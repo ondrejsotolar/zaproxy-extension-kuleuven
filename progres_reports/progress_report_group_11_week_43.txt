@@ -1,0 +1,4 @@
+Report week 43
+================
+
+Topic: organisation of the group, git usage strategy, User story selection
