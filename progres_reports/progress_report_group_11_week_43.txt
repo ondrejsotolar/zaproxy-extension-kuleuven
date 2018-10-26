@@ -2,3 +2,16 @@ Report week 43
 ================
 
 Topic: organisation of the group, git usage strategy, User story selection
+
+
+
+User story choice:
+8. Typosquatting prevention (4p)
+
+Questions for the supervisor
+1. How to write tests for zap?
+	- how to use the tests already in the solution
+	- how to use the proxy
+
+Resolution
+everybody has the repo and git setup
