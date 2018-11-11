@@ -27,7 +27,7 @@ import org.parosproxy.paros.extension.ViewDelegate;
 import org.parosproxy.paros.model.Model;
 import org.parosproxy.paros.network.HttpMessage;
 
-public interface Filter {
+    public interface Filter {
 
     /**
      * @param model

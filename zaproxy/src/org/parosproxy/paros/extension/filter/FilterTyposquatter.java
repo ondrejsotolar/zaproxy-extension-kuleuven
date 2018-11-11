@@ -1,19 +1,19 @@
 /*
  *
  * Paros and its related class files.
- * 
+ *
  * Paros is an HTTP/HTTPS proxy for assessing web application security.
  * Copyright (C) 2003-2004 Chinotec Technologies Company
- * 
+ *
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the Clarified Artistic License
  * as published by the Free Software Foundation.
- * 
+ *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * Clarified Artistic License for more details.
- * 
+ *
  * You should have received a copy of the Clarified Artistic License
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
@@ -25,45 +25,64 @@
 
 package org.parosproxy.paros.extension.filter;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.parosproxy.paros.Constant;
+import org.parosproxy.paros.model.Model;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.network.HttpRequestHeader;
 
 
-public class FilterReplaceRequestHeader extends FilterAbstractReplace {
+public class FilterTyposquatter extends ExtensionFilter /*implements Filter*/ {
 
-    @Override
+
+
     public int getId() {
-        return 50;
+        return 500;
     }
 
     @Override
     public String getName() {
-        return Constant.messages.getString("filter.replacereqheader.name");
+        return "AAAAAAAAAAAAAA Typosquatter extension";
     }
 
     @Override
-    public void onHttpRequestSend(HttpMessage msg) {
+    public boolean onHttpRequestSend(HttpMessage msg) {
 
-        if (getPattern() == null || msg.getRequestHeader().isEmpty()) {
-            return;
-        }
-        
-        Matcher matcher = getPattern().matcher(msg.getRequestHeader().toString());
-        String result = matcher.replaceAll(getReplaceText());
-        try {
-            msg.getRequestHeader().setMessage(result);
-        } catch (HttpMalformedHeaderException e) {
+        List<String> whiteList = new ArrayList<>(); // TODO replace with actual whitelist
+        whiteList.add("motherfuckingwebsite.com");
 
+        String host = msg.getRequestHeader().getHostName();
+
+        if (whiteList.contains(host)) {
+            //throw new RuntimeException("AAAAAAAAAAAAAAAAAAA");
+            return false;
+
+//            HttpRequestHeader h = new HttpRequestHeader();
+//            try {
+//                h.setURI(new URI("127.0.0.1"));
+//                h.setMethod("GET");
+//            } catch (URIException e) {
+//                e.printStackTrace();
+//            }
+//            msg.setRequestHeader(h);
         }
-        
-        
+        else {
+            // pass through
+            return true;
+        }
+
     }
 
     @Override
-    public void onHttpResponseReceive(HttpMessage msg) {
-        System.out.println("");
+    public boolean onHttpResponseReceive(HttpMessage msg) {
+        return true;
     }
+
+
 }

@@ -113,6 +113,7 @@ public final class CoreFunctionality {
 			extensions.add(new org.zaproxy.zap.extension.stdmenus.ExtensionStdMenus());
 			extensions.add(new org.zaproxy.zap.extension.uiutils.ExtensionUiUtils());
 			extensions.add(new org.zaproxy.zap.extension.users.ExtensionUserManagement());
+			extensions.add(new org.parosproxy.paros.extension.typosquatter.ExtensionTyposquatter());
 			extensions.trimToSize();
 
 			builtInExtensions = Collections.unmodifiableList(extensions);
