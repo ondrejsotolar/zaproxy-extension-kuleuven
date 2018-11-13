@@ -1,25 +1,20 @@
 package org.parosproxy.paros.extension.typosquatter;
 
-import org.parosproxy.paros.Constant;
 import org.parosproxy.paros.core.proxy.ProxyListener;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.ViewDelegate;
-import org.parosproxy.paros.extension.filter.ExtensionFilter;
-import org.parosproxy.paros.extension.filter.Filter;
-import org.parosproxy.paros.extension.filter.FilterDialog;
 import org.parosproxy.paros.model.Model;
+import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.view.ZapMenuItem;
-
-import java.util.List;
 
 public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyListener {
 
     public static final int PROXY_LISTENER_ORDER = 0;
     public static final String NAME = "ExtensionTyposquatter";
-    private TimerFilterThread timerFilterThread;
 
+    private boolean ON = false;
     private ZapMenuItem menuToolsFilter = null;
 
     public ExtensionTyposquatter() {
@@ -57,31 +52,9 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         if (menuToolsFilter == null) {
             menuToolsFilter = new ZapMenuItem("menu.tools.typosquatter");
             menuToolsFilter.addActionListener(new java.awt.event.ActionListener() {
-
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
-                    boolean startThread = true;
-//                    FilterDialog dialog = new FilterDialog(getView().getMainFrame());
-//                    dialog.setAllFilters(filterFactory.getAllFilter());
-//                    dialog.showDialog(false);
-//
-//                    boolean startThread = false;
-//                    for (Filter filter : filterFactory.getAllFilter()) {
-//                        if (filter.isEnabled()) {
-//                            startThread = true;
-//                            break;
-//                        }
-//                    }
-
-                    if (startThread) {
-                        if (timerFilterThread == null) {
-                            timerFilterThread = new TimerFilterThread();
-                            timerFilterThread.start();
-                        }
-                    } else if (timerFilterThread != null) {
-                        timerFilterThread.setStopped();
-                        timerFilterThread = null;
-                    }
+                    ON = !ON;
                 }
             });
 
@@ -91,12 +64,27 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
     @Override
     public boolean onHttpRequestSend(HttpMessage msg) {
-        return false;
+        return true;
     }
 
     @Override
     public boolean onHttpResponseReceive(HttpMessage msg) {
-        return false;
+        if (!ON) {
+            return true;
+        }
+
+        String host = msg.getRequestHeader().getHostName();
+        if (host.equals("motherfuckingwebsite.com")) {
+            msg.setResponseBody("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Blocked by proxy</title></head><body><H1>Blocked by proxy!</H1></body></html>");
+            try {
+                msg.setResponseHeader("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8");
+            } catch (HttpMalformedHeaderException e) {
+                e.printStackTrace();
+            }
+            msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+
+        }
+        return true;
     }
 
     @Override
@@ -113,17 +101,6 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         return PROXY_LISTENER_ORDER;
     }
 
-    /**
-     * Destroy every filter during extension destroy.
-     */
-    @Override
-    public void destroy() {
-        if (timerFilterThread != null) {
-            timerFilterThread.setStopped();
-            timerFilterThread = null;
-        }
-    }
-
     @Override
     public String getAuthor() {
         return "ondrej.sotolar@gmail.com";
@@ -135,29 +112,5 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
     @Override
     public boolean supportsDb(String type) {
         return true;
-    }
-
-    static class TimerFilterThread extends Thread {
-
-        private boolean stop;
-
-        public TimerFilterThread() {
-            super("ZAP-ExtensionTyposquatter");
-            setDaemon(true);
-        }
-
-        @Override
-        public void run() {
-            while (!stop) {
-                try {
-                    Thread.sleep(5000);
-                } catch (InterruptedException e1) {
-                }
-            }
-        }
-
-        public void setStopped() {
-            this.stop = true;
-        }
     }
 }
