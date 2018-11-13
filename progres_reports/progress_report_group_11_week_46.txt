@@ -1,0 +1,22 @@
+Progress report Group 11 week 46
+================================
+Current user story: Typosquatter
+
+Current state:
+----------------
+Skeleton implementation of Tposquatter is finished. The ProxyThread class was used as a base class. UI menu item added to Tools.
+
+The extension can now:
+- be turned on/off in Tools menu
+- catch all requests and stop them before being sent to the respective host
+- return a simple HTML page with warning
+
+TODO
+-----------------
+- UI button and menu indicator of on/off state
+- add a possibility to user to continue request send: add buttons and info text to HTML response page
+- implement whitelist check mechanism
+
+
+
+
