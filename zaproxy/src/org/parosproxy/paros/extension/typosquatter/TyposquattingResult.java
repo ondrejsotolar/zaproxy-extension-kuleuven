@@ -1,9 +1,6 @@
 package org.parosproxy.paros.extension.typosquatter;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TyposquattingResult {
     private String candidate;
@@ -38,5 +35,9 @@ public class TyposquattingResult {
 
     public boolean getResult() {
         return this.failedTyposquattingStrategies.size() > 0;
+    }
+
+    public Collection<String> getPossibleHosts() {
+        return failedTyposquattingStrategies.keySet();
     }
 }

@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyListener {
@@ -77,11 +78,8 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         return menuToolsFilter;
     }
 
-    public boolean isTypoInUrl(HttpMessage msg) {
-        String candidate = msg.getRequestHeader().getHostName();
-
-        TyposquattingResult result = typosquattingService.checkCandidateHost(candidate);
-        return result.getResult();
+    public TyposquattingResult isTypoInUrl(String candidate) {
+        return typosquattingService.checkCandidateHost(candidate);
     }
 
     @Override
@@ -89,32 +87,38 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         if (!ON) {
             return true;
         }
-        if (isTypoInUrl(msg)) {
+        String candidate = msg.getRequestHeader().getHostName();
+        if (isTypoInUrl(candidate).getResult()) {
             throw new RuntimeException("ExtensionTyposquatter caught a typo.");
         }
         return true;
     }
 
-    // TODO: page with proceed button
-    public void setResponseBodyContent(HttpMessage msg) {
-        msg.setResponseBody("<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Blocked by proxy</title></head><body><H1>Blocked by proxy!</H1></body></html>");
-        try {
-            msg.setResponseHeader("HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8");
-        } catch (HttpMalformedHeaderException e) {
-            e.printStackTrace();
-        }
-        msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
-    }
-
+    // TODO: optimize: don't run isTypoInUrl twice
+    // TODO: respect protocol (http vs https)
     @Override
     public boolean onHttpResponseReceive(HttpMessage msg) {
         if (!ON) {
             return true;
         }
-        if (isTypoInUrl(msg)) {
-            setResponseBodyContent(msg);
+        String candidate = msg.getRequestHeader().getHostName();
+        TyposquattingResult result = isTypoInUrl(candidate);
+        if (result.getResult()) {
+            setResponseBodyContent(msg, result.getPossibleHosts());
         }
         return true;
+    }
+
+    public void setResponseBodyContent(HttpMessage msg, Collection<String> hosts) {
+        ResultPage resultPage = new ResultPage();
+
+        msg.setResponseBody(resultPage.getBody(hosts));
+        try {
+            msg.setResponseHeader(resultPage.getHeader());
+        } catch (HttpMalformedHeaderException e) {
+            e.printStackTrace();
+        }
+        msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
     }
 
     @Override
