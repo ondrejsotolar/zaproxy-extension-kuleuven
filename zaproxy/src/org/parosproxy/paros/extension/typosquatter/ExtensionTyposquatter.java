@@ -1,7 +1,5 @@
 package org.parosproxy.paros.extension.typosquatter;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.parosproxy.paros.core.proxy.ProxyListener;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
@@ -9,10 +7,14 @@ import org.parosproxy.paros.extension.ViewDelegate;
 import org.parosproxy.paros.model.Model;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
-import org.parosproxy.paros.network.HttpRequestHeader;
 import org.zaproxy.zap.view.ZapMenuItem;
 
-import java.net.MalformedURLException;
+import javax.swing.*;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyListener {
 
@@ -21,6 +23,7 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
     private boolean ON = false;
     private ZapMenuItem menuToolsFilter = null;
+    private TyposquattingService typosquattingService;
 
     public ExtensionTyposquatter() {
         super();
@@ -59,6 +62,13 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
             menuToolsFilter.addActionListener(new java.awt.event.ActionListener() {
                 @Override
                 public void actionPerformed(java.awt.event.ActionEvent e) {
+                    if (!ON) {
+                        List<String> whitelist = getWhiteList();
+                        if (whitelist == null) {
+                            return; // dialog closed or malformed file
+                        }
+                        typosquattingService = new TyposquattingService(whitelist);
+                    }
                     ON = !ON;
                 }
             });
@@ -68,10 +78,10 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
     }
 
     public boolean isTypoInUrl(HttpMessage msg) {
-        String host = msg.getRequestHeader().getHostName();
+        String candidate = msg.getRequestHeader().getHostName();
 
-        // TODO: use actual whitelist
-        return host.contains(".");
+        TyposquattingResult result = typosquattingService.checkCandidateHost(candidate);
+        return result.getResult();
     }
 
     @Override
@@ -132,5 +142,45 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
     @Override
     public boolean supportsDb(String type) {
         return true;
+    }
+
+    // TODO: handle malformed file
+    public List<String> getWhiteList() {
+        File whitelistFile = getWhitelistFile();
+        if (whitelistFile == null) {
+            return null; // Dialog closed
+        }
+
+        return parseWhitelistFile(whitelistFile);
+    }
+
+    public File getWhitelistFile() {
+        JFileChooser chooser = new JFileChooser(getModel().getOptionsParam().getUserDirectory());
+        File file = null;
+
+        int rc = chooser.showSaveDialog(getView().getMainFrame());
+        if(rc == JFileChooser.APPROVE_OPTION) {
+            return chooser.getSelectedFile();
+        }
+        return file;
+    }
+
+    // TODO: handle malformed file
+    public List<String> parseWhitelistFile(File file) {
+        List<String> whitelist = new ArrayList<>();
+        if (file == null) {
+            return whitelist;
+        }
+
+        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = br.readLine()) != null) {
+                whitelist.add(line);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+        return whitelist;
     }
 }
