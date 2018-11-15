@@ -4,19 +4,20 @@ Current user story: Typosquatter
 
 Current state:
 ----------------
-Skeleton implementation of Tposquatter is finished. The ProxyThread class was used as a base class. UI menu item added to Tools.
+Skeleton implementation of Typosquatter is finished. The ProxyThread class was used as a base class. UI menu item added to Tools.
 
 The extension can now:
 - be turned on/off in Tools menu
+- load a whitelist of hosts from a text file
 - catch all requests and stop them before being sent to the respective host
-- return a simple HTML page with warning
+- apply strategies that determine wheather the request should be stopped
+- return a simple HTML page with warning and proceed button
 
 TODO
 -----------------
-- UI button and menu indicator of on/off state
-- add a possibility to user to continue request send: add buttons and info text to HTML response page
-- implement whitelist check mechanism
-
+- UI button and/or menu indicator of on/off state
+- implement user settings persistance
+- refine the request handling (respoct protocols etc.)
 
 
 
