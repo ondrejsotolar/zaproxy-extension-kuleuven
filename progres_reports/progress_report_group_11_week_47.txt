@@ -1,0 +1,5 @@
+TODO:
+Implement filtering strategies
+Ondrej: 1 Extra character
+Aditya: 2 Adj swapped chars
+Dennis: 1 replaced character
