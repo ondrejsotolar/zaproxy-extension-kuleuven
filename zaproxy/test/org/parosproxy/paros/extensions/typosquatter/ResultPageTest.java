@@ -14,9 +14,8 @@ public class ResultPageTest {
         String expected = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Blocked by proxy</title></head><body><H1>Blocked by proxy!</H1><form action=\"http://google.com\" method=\"GET\"><button type=\"submit\">Proceed to google.com</button></form><br></body></html>";
 
         ResultPage resultPage = new ResultPage();
-        List<String> hosts = new ArrayList<>();
-        hosts.add("google.com");
-        String actual = resultPage.getBody(hosts);
+
+        String actual = resultPage.getBody("google.com");
 
         Assert.assertEquals(expected, actual);
 
@@ -27,10 +26,7 @@ public class ResultPageTest {
         String expected = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>Blocked by proxy</title></head><body><H1>Blocked by proxy!</H1><form action=\"http://google.com\" method=\"GET\"><button type=\"submit\">Proceed to google.com</button></form><br><form action=\"http://duckduckgo.com\" method=\"GET\"><button type=\"submit\">Proceed to duckduckgo.com</button></form><br></body></html>";
 
         ResultPage resultPage = new ResultPage();
-        List<String> hosts = new ArrayList<>();
-        hosts.add("google.com");
-        hosts.add("duckduckgo.com");
-        String actual = resultPage.getBody(hosts);
+        String actual = resultPage.getBody("google.com");
 
         Assert.assertEquals(expected, actual);
 

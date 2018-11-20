@@ -1,5 +1,7 @@
 package org.parosproxy.paros.extension.typosquatter;
 
+import org.apache.commons.httpclient.URI;
+import org.apache.commons.httpclient.URIException;
 import org.parosproxy.paros.core.proxy.ProxyListener;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
@@ -13,6 +15,10 @@ import javax.swing.*;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -21,14 +27,18 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
     public static final int PROXY_LISTENER_ORDER = 0;
     public static final String NAME = "ExtensionTyposquatter";
+    public static final String ADD_TO_WHITELIST_KEYWORD = "?save=true";
 
     private boolean ON = false;
     private ZapMenuItem menuToolsFilter = null;
     private TyposquattingService typosquattingService;
+    private PersistanceService persistanceService;
+    private Path pathToWhitelist;
 
     public ExtensionTyposquatter() {
         super();
         setOrder(777);
+        persistanceService = new TextFilePersistence();
     }
 
     @Override
@@ -60,26 +70,24 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
     private ZapMenuItem getMenuToolsFilter() {
         if (menuToolsFilter == null) {
             menuToolsFilter = new ZapMenuItem("menu.tools.typosquatter");
-            menuToolsFilter.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (!ON) {
-                        List<String> whitelist = getWhiteList();
-                        if (whitelist == null) {
-                            return; // dialog closed or malformed file
-                        }
-                        typosquattingService = new TyposquattingService(whitelist);
+
+            Model model = getModel();
+            ViewDelegate view = getView();
+            menuToolsFilter.addActionListener(e -> {
+                if (!ON) {
+                    File file = persistanceService.getWhitelistFile(model, view);
+                    this.pathToWhitelist = file.toPath();
+                    List<String> whiteList = persistanceService.getWhiteList(file);
+                    if (whiteList == null) {
+                        return; // dialog closed or malformed file
                     }
-                    ON = !ON;
+                    typosquattingService = new TyposquattingService(whiteList);
                 }
+                ON = !ON;
             });
 
         }
         return menuToolsFilter;
-    }
-
-    public TyposquattingResult isTypoInUrl(String candidate) {
-        return typosquattingService.checkCandidateHost(candidate);
     }
 
     @Override
@@ -87,14 +95,23 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         if (!ON) {
             return true;
         }
+        String uri = msg.getRequestHeader().getURI().toString();
         String candidate = msg.getRequestHeader().getHostName();
-        if (isTypoInUrl(candidate).getResult()) {
+
+        if (uri.contains(ADD_TO_WHITELIST_KEYWORD)) {
+            persistanceService.persistToWhitelist(candidate, this.pathToWhitelist);
+            typosquattingService.setWhiteList(
+                    persistanceService.parseWhitelistFile(this.pathToWhitelist.toFile()));
+            removeSaveCommandFromRequest(msg);
+            return true;
+        }
+
+        if (typosquattingService.checkCandidateHost(candidate).getResult()) {
             throw new RuntimeException("ExtensionTyposquatter caught a typo.");
         }
         return true;
     }
 
-    // TODO: optimize: don't run isTypoInUrl twice
     // TODO: respect protocol (http vs https)
     @Override
     public boolean onHttpResponseReceive(HttpMessage msg) {
@@ -102,23 +119,34 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
             return true;
         }
         String candidate = msg.getRequestHeader().getHostName();
-        TyposquattingResult result = isTypoInUrl(candidate);
-        if (result.getResult()) {
-            setResponseBodyContent(msg, result.getPossibleHosts());
+        TyposquattingResult res = typosquattingService.checkCandidateHost(candidate);
+        if (res.getResult()) {
+            setResponseBodyContent(msg, res.getCandidate());
         }
+
         return true;
     }
 
-    public void setResponseBodyContent(HttpMessage msg, Collection<String> hosts) {
+    public void setResponseBodyContent(HttpMessage msg, String host) {
         ResultPage resultPage = new ResultPage();
+        msg.setResponseBody(resultPage.getBody(host));
 
-        msg.setResponseBody(resultPage.getBody(hosts));
         try {
             msg.setResponseHeader(resultPage.getHeader());
         } catch (HttpMalformedHeaderException e) {
             e.printStackTrace();
         }
         msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+    }
+
+    public void removeSaveCommandFromRequest(HttpMessage msg) {
+        String uri = msg.getRequestHeader().getURI().toString();
+        try {
+            msg.getRequestHeader().setURI(
+                    new URI(uri.substring(0, uri.indexOf(ADD_TO_WHITELIST_KEYWORD))));
+        } catch (URIException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -148,43 +176,19 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         return true;
     }
 
-    // TODO: handle malformed file
-    public List<String> getWhiteList() {
-        File whitelistFile = getWhitelistFile();
-        if (whitelistFile == null) {
-            return null; // Dialog closed
-        }
-
-        return parseWhitelistFile(whitelistFile);
+    public boolean isON() {
+        return ON;
     }
 
-    public File getWhitelistFile() {
-        JFileChooser chooser = new JFileChooser(getModel().getOptionsParam().getUserDirectory());
-        File file = null;
-
-        int rc = chooser.showSaveDialog(getView().getMainFrame());
-        if(rc == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile();
-        }
-        return file;
+    public void setON(boolean ON) {
+        this.ON = ON;
     }
 
-    // TODO: handle malformed file
-    public List<String> parseWhitelistFile(File file) {
-        List<String> whitelist = new ArrayList<>();
-        if (file == null) {
-            return whitelist;
-        }
+    public Path getPathToWhitelist() {
+        return pathToWhitelist;
+    }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                whitelist.add(line);
-            }
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        return whitelist;
+    public void setPathToWhitelist(Path pathToWhitelist) {
+        this.pathToWhitelist = pathToWhitelist;
     }
 }
