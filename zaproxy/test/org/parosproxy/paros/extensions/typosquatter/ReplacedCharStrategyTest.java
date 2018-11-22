@@ -62,4 +62,50 @@ public class ReplacedCharStrategyTest {
 
         Assert.assertFalse(res);
     }
+
+    @Test
+    public void testStringDiff0(){
+        String host = "google.com";
+        String cand = "google.com";
+        int res = strat.checkString(host,cand);
+
+        Assert.assertEquals(res, 0);
+    }
+
+    @Test
+    public void testStringDiff1(){
+        String host = "gobgle.com";
+        String cand = "google.com";
+        int res = strat.checkString(host,cand);
+
+        Assert.assertEquals(res, 1);
+    }
+
+    @Test
+    public void testStringDiff2(){
+        String host = "gbbgle.com";
+        String cand = "google.com";
+        int res = strat.checkString(host,cand);
+
+        Assert.assertEquals(res, 2);
+    }
+
+    @Test
+    public void testStringDiff1a(){
+        String host = "google,com";
+        String cand = "google.com";
+        int res = strat.checkString(host,cand);
+
+        Assert.assertEquals(res, 1);
+    }
+
+    @Test
+    public void testStringDiff10(){
+        String host = "asdfgjklut";
+        String cand = "google.com";
+        int res = strat.checkString(host,cand);
+
+        Assert.assertEquals(res, 10);
+    }
+
 }

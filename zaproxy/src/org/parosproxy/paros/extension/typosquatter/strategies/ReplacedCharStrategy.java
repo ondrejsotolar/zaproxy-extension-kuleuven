@@ -27,14 +27,28 @@ public class ReplacedCharStrategy  implements TyposquattingStrategy{
         if (host.length() != candidate.length())
             return false;
 
-        System.out.println(org.apache.commons.lang.StringUtils.difference(candidate, host));
-        System.out.println(org.apache.commons.lang.StringUtils.difference(host, candidate));
+        int res = checkString(host, candidate);
 
-        if (org.apache.commons.lang.StringUtils.difference(host, candidate).length() == 1 )
+        if(res == 1)
             return true;
         else
             return false;
 
+    }
+
+    public int checkString(String host, String candidate){
+
+        char[] hostChars = host.toCharArray();
+        char[] candidateChar = candidate.toCharArray();
+        int length = hostChars.length;
+        int res = 0;
+
+        for (int i = 0; i<length; i++){
+            if(hostChars[i] != candidateChar[i])
+                res++;
+        }
+
+        return res;
     }
     /*
         String regex = getRegex(host);
