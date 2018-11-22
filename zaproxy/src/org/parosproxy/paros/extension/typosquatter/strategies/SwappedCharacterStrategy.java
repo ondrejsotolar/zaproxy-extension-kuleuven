@@ -46,11 +46,4 @@ public class SwappedCharacterStrategy implements TyposquattingStrategy {
                 host.charAt(pos) == candidate.charAt(pos-1));
     }
 
-    public String getCandidate(String host){
-
-        // TODO: confusion?? whether to return origenal host or the swapped one??
-
-        return "google.com";
-    }
-
 }
