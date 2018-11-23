@@ -2,6 +2,7 @@ package org.parosproxy.paros.extension.typosquatter;
 
 import org.parosproxy.paros.extension.typosquatter.strategies.LongHostStrategy;
 import org.parosproxy.paros.extension.typosquatter.strategies.SwappedCharacterStrategy;
+import org.parosproxy.paros.extension.typosquatter.strategies.ReplacedCharStrategy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,7 @@ public class TyposquattingService {
 
         strategies.add(new LongHostStrategy());
         strategies.add(new SwappedCharacterStrategy()); 
+        strategies.add(new ReplacedCharStrategy());
     }
 
 
