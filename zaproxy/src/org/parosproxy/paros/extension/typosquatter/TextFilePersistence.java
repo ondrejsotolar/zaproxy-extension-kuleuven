@@ -57,18 +57,18 @@ public class TextFilePersistence implements PersistanceService {
         return whitelist;
     }
 
-    @Override
-    public void addToWhitelistFile(String host, File whitelistFile) {
-        if (whitelistFile == null) {
-            return;
-        }
-        try {
-            Files.write(whitelistFile.toPath(), (System.lineSeparator() + host).getBytes(),
-                    StandardOpenOption.APPEND);
-        }catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    @Override
+//    public void addToWhitelistFile(String host, File whitelistFile) {
+//        if (whitelistFile == null) {
+//            return;
+//        }
+//        try {
+//            Files.write(whitelistFile.toPath(), (System.lineSeparator() + host).getBytes(),
+//                    StandardOpenOption.APPEND);
+//        }catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     @Override
     public void persistToWhitelist(String hostName, Path pathToWhitelist) {
@@ -80,8 +80,8 @@ public class TextFilePersistence implements PersistanceService {
         }
     }
 
-    @Override
-    public boolean addToWhiteListAndPassThrough(HttpMessage msg, String candidate) {
-        return false;
-    }
+//    @Override
+//    public boolean addToWhiteListAndPassThrough(HttpMessage msg, String candidate) {
+//        return false;
+//    }
 }
