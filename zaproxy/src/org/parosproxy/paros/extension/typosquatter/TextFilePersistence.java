@@ -2,7 +2,6 @@ package org.parosproxy.paros.extension.typosquatter;
 
 import org.parosproxy.paros.extension.ViewDelegate;
 import org.parosproxy.paros.model.Model;
-import org.parosproxy.paros.network.HttpMessage;
 
 import javax.swing.*;
 import java.io.BufferedReader;
@@ -57,19 +56,6 @@ public class TextFilePersistence implements PersistanceService {
         return whitelist;
     }
 
-//    @Override
-//    public void addToWhitelistFile(String host, File whitelistFile) {
-//        if (whitelistFile == null) {
-//            return;
-//        }
-//        try {
-//            Files.write(whitelistFile.toPath(), (System.lineSeparator() + host).getBytes(),
-//                    StandardOpenOption.APPEND);
-//        }catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     @Override
     public void persistToWhitelist(String hostName, Path pathToWhitelist) {
         try {
@@ -79,9 +65,4 @@ public class TextFilePersistence implements PersistanceService {
             e.printStackTrace();
         }
     }
-
-//    @Override
-//    public boolean addToWhiteListAndPassThrough(HttpMessage msg, String candidate) {
-//        return false;
-//    }
 }

@@ -11,16 +11,8 @@ import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.view.ZapMenuItem;
 
-import javax.swing.*;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 
 public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyListener {
@@ -182,13 +174,5 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
     public void setON(boolean ON) {
         this.ON = ON;
-    }
-
-    public Path getPathToWhitelist() {
-        return pathToWhitelist;
-    }
-
-    public void setPathToWhitelist(Path pathToWhitelist) {
-        this.pathToWhitelist = pathToWhitelist;
     }
 }

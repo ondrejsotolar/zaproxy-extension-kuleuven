@@ -1,8 +1,5 @@
 package org.parosproxy.paros.extension.typosquatter;
 
-import java.util.Collection;
-import java.util.List;
-
 public class ResultPage {
 
     private String header = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8";

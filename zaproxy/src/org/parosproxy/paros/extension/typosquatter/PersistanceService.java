@@ -16,9 +16,5 @@ public interface PersistanceService {
 
     List<String> parseWhitelistFile(File file);
 
-    //void addToWhitelistFile(String host, File whitelistFile);
-
     void persistToWhitelist(String hostName, Path pathToWhitelist);
-
-    //boolean addToWhiteListAndPassThrough(HttpMessage msg, String candidate);
 }

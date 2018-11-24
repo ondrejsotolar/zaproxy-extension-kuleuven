@@ -50,30 +50,4 @@ public class ReplacedCharStrategy  implements TyposquattingStrategy{
 
         return res;
     }
-    /*
-        String regex = getRegex(host);
-        Pattern pattern = Pattern.compile(regex, Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(candidate);
-
-        return matcher.matches();
-    }*/
-
-    /**
-     * Build the regex from host name
-     * Example:
-     *  Host: google.com
-     *  Desired regex: (?=[google.com]{9})g?o?o?g?l?e?\.?c?o?m?
-     * @param host
-     * @return regex string
-     */
-   /* public String getRegex(String host) {
-        String regexBase = "(?=[%s]{%d})";
-
-        for (Character c : host.toCharArray()) {
-            regexBase += c + "?";
-        }
-
-        String result = String.format(regexBase, host, host.length() - 1);
-        return result;
-    }*/
 }

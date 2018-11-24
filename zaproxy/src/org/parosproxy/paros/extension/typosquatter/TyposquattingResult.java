@@ -19,10 +19,6 @@ public class TyposquattingResult {
         this.candidate = candidate;
     }
 
-    public Map<String, List<String>> getFailedTyposquattingStrategies() {
-        return failedTyposquattingStrategies;
-    }
-
     public void addFailedTyposquattingStrategy(String host, String name) {
         if (!failedTyposquattingStrategies.containsKey(host)) {
             List<String> strategyNames = new ArrayList<>();
@@ -35,9 +31,5 @@ public class TyposquattingResult {
 
     public boolean getResult() {
         return this.failedTyposquattingStrategies.size() > 0;
-    }
-
-    public Collection<String> getPossibleHosts() {
-        return failedTyposquattingStrategies.keySet();
     }
 }
