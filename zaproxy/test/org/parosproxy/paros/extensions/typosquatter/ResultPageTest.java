@@ -4,9 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.parosproxy.paros.extension.typosquatter.ResultPage;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class ResultPageTest {
 
     @Test

@@ -7,7 +7,7 @@ import org.parosproxy.paros.extension.typosquatter.strategies.ReplacedCharStrate
 import java.util.ArrayList;
 import java.util.List;
 
-public class TyposquattingService {
+public class TyposquattingService implements ITyposquattingService {
 
     private List<String> whiteList;
     private List<TyposquattingStrategy> strategies;
@@ -17,7 +17,8 @@ public class TyposquattingService {
         initStrategies();
     }
 
-    public TyposquattingResult checkCandidateHost (String candidate) {
+    @Override
+    public TyposquattingResult checkCandidateHost(String candidate) {
         if (candidate == null || candidate.isEmpty()) {
             throw new RuntimeException("TyposquattingService.checkCandidateHost: empty or null candidate host");
         }
@@ -38,6 +39,7 @@ public class TyposquattingService {
         return result;
     }
 
+    @Override
     public void setWhiteList(List<String> newList) {
         this.whiteList = newList;
     }
@@ -48,6 +50,10 @@ public class TyposquattingService {
         strategies.add(new LongHostStrategy());
         strategies.add(new SwappedCharacterStrategy()); 
         strategies.add(new ReplacedCharStrategy());
+    }
+
+    public void setStrategies(List<TyposquattingStrategy> strategies) {
+        this.strategies = strategies;
     }
 
 

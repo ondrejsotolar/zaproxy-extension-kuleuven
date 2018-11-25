@@ -23,7 +23,7 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
     private boolean ON = false;
     private ZapMenuItem menuToolsFilter = null;
-    private TyposquattingService typosquattingService;
+    private ITyposquattingService typosquattingService;
     private PersistanceService persistanceService;
     private Path pathToWhitelist;
 
@@ -31,6 +31,14 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         super();
         setOrder(777);
         persistanceService = new TextFilePersistence();
+    }
+
+    public ExtensionTyposquatter(ITyposquattingService typosquattingService,
+                                 PersistanceService persistanceService) {
+        super();
+        setOrder(777);
+        this.persistanceService = persistanceService;
+        this.typosquattingService = typosquattingService;
     }
 
     @Override
