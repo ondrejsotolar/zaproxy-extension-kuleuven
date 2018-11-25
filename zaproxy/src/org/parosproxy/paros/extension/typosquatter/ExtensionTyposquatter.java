@@ -1,7 +1,5 @@
 package org.parosproxy.paros.extension.typosquatter;
 
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.parosproxy.paros.core.proxy.ProxyListener;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
@@ -14,12 +12,15 @@ import org.zaproxy.zap.view.ZapMenuItem;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyListener {
 
     public static final int PROXY_LISTENER_ORDER = 0;
     public static final String NAME = "ExtensionTyposquatter";
-    public static final String ADD_TO_WHITELIST_KEYWORD = "?save=true";
+    public static final String ADD_TO_WHITELIST_KEYWORD = "save=true";
 
     private boolean ON = false;
     private ZapMenuItem menuToolsFilter = null;
@@ -27,10 +28,14 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
     private PersistanceService persistanceService;
     private Path pathToWhitelist;
 
+    private ConcurrentHashMap<HttpMessage, Integer> requestCache;
+    private int requestCounter = 0;
+
     public ExtensionTyposquatter() {
         super();
         setOrder(777);
         persistanceService = new TextFilePersistence();
+        requestCache = new ConcurrentHashMap<>();
     }
 
     public ExtensionTyposquatter(ITyposquattingService typosquattingService,
@@ -39,6 +44,7 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         setOrder(777);
         this.persistanceService = persistanceService;
         this.typosquattingService = typosquattingService;
+        requestCache = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -95,24 +101,28 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         if (!ON) {
             return true;
         }
-        String uri = msg.getRequestHeader().getURI().toString();
         String candidate = msg.getRequestHeader().getHostName();
+        String body = msg.getRequestBody().toString();
 
-        if (uri.contains(ADD_TO_WHITELIST_KEYWORD)) {
+        if (body.contains(ADD_TO_WHITELIST_KEYWORD)) {
             persistanceService.persistToWhitelist(candidate, this.pathToWhitelist);
             typosquattingService.setWhiteList(
                     persistanceService.parseWhitelistFile(this.pathToWhitelist.toFile()));
-            removeSaveCommandFromRequest(msg);
+
+            HttpMessage originalRequest = getRequestById(getRequestIdFromUri(body));
+            msg.setRequestHeader(originalRequest.getRequestHeader());
+            msg.setRequestBody(originalRequest.getRequestBody());
+
             return true;
         }
 
         if (typosquattingService.checkCandidateHost(candidate).getResult()) {
+            putRequestInCache(msg);
             throw new RuntimeException("ExtensionTyposquatter caught a typo.");
         }
         return true;
     }
 
-    // TODO: respect protocol (http vs https)
     @Override
     public boolean onHttpResponseReceive(HttpMessage msg) {
         if (!ON) {
@@ -120,16 +130,17 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         }
         String candidate = msg.getRequestHeader().getHostName();
         TyposquattingResult res = typosquattingService.checkCandidateHost(candidate);
+
         if (res.getResult()) {
-            setResponseBodyContent(msg, res.getCandidate());
+            setResponseBodyContent(msg, candidate, this.requestCache.get(msg));
         }
 
         return true;
     }
 
-    public void setResponseBodyContent(HttpMessage msg, String host) {
+    public void setResponseBodyContent(HttpMessage msg, String host, int requestId) {
         ResultPage resultPage = new ResultPage();
-        msg.setResponseBody(resultPage.getBody(host));
+        msg.setResponseBody(resultPage.getBody(host, requestId));
 
         try {
             msg.setResponseHeader(resultPage.getHeader());
@@ -139,14 +150,20 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
     }
 
-    public void removeSaveCommandFromRequest(HttpMessage msg) {
-        String uri = msg.getRequestHeader().getURI().toString();
-        try {
-            msg.getRequestHeader().setURI(
-                    new URI(uri.substring(0, uri.indexOf(ADD_TO_WHITELIST_KEYWORD))));
-        } catch (URIException e) {
-            e.printStackTrace();
-        }
+    public HttpMessage getRequestById(int id) {
+        HttpMessage originalRequest = this.requestCache.entrySet()
+                .stream()
+                .filter(entry -> Objects.equals(entry.getValue(), id))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .get();
+        return originalRequest;
+    }
+
+    public int getRequestIdFromUri(String uri) {
+        String requestIdParam = uri.substring(uri.indexOf("requestId"));
+        int requestId = Integer.parseInt(requestIdParam.substring(requestIdParam.indexOf("=")+1));
+        return requestId;
     }
 
     @Override
@@ -182,5 +199,13 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
     public void setON(boolean ON) {
         this.ON = ON;
+    }
+
+    private void putRequestInCache(HttpMessage message) {
+        if (requestCounter >= Integer.MAX_VALUE - 1) {
+            requestCounter = 0;
+            this.requestCache.clear(); // primitive cache size management
+        }
+        this.requestCache.put(message, requestCounter++);
     }
 }

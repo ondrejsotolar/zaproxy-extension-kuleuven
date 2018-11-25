@@ -30,7 +30,7 @@ public class TextFilePersistence implements PersistanceService {
         JFileChooser chooser = new JFileChooser(model.getOptionsParam().getUserDirectory());
         File file = null;
 
-        int rc = chooser.showSaveDialog(view.getMainFrame());
+        int rc = chooser.showOpenDialog(view.getMainFrame());
         if(rc == JFileChooser.APPROVE_OPTION) {
             return chooser.getSelectedFile();
         }
