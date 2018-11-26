@@ -20,7 +20,7 @@ public class ShortHostStrategy implements TyposquattingStrategy{
      * @return true if typosquatting is detected
      */
     public boolean applyStrategy(String host, String candidate) {
-        if (host.length() == candidate.length())
+        if (host.length()+1 != candidate.length())
             return false;
 
         String regex = getRegex(host);
@@ -34,20 +34,16 @@ public class ShortHostStrategy implements TyposquattingStrategy{
      * Build the regex from host name
      * Example:
      *  Host: google.com
-     *  Desired regex: (?=[google.com]{9})g?o?o?g?l?e?\.?c?o?m?
+     *  Desired regex: .?g.?o.?o.?g.?l.?e.?\..?c.?o.?m.?
      * @param host
      * @return regex string
      */
     public String getRegex(String host) {
-        String regexBase = "(?=[%s]{%d})\\w?";
-        //regexBase += "\\w?";
-
+        String regexBase = ".?";
         for (Character c : host.toCharArray()) {
-            regexBase += c + "\\w?";
+            regexBase += (c.equals('.')) ? "\\" + c + ".?" : c + ".?";
         }
-
-        String result = String.format(regexBase, host, host.length() + 1);
-        return result;
+        return regexBase;
     }
 
 }

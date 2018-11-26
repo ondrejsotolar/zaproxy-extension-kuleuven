@@ -15,7 +15,7 @@ public class ShortHostStrategyTest {
     public void testRegexBuild_ShortHostStrategy() throws Exception{
         ShortHostStrategy strategy = new ShortHostStrategy();
 
-        String expected = "(?=[google.com]{9})\\w?g\\w?o\\w?o\\w?g\\w?l\\w?e\\w?";
+        String expected = ".?g.?o.?o.?g.?l.?e.?\\..?c.?o.?m.?";
         String actual = strategy.getRegex("google.com");
 
         Assert.assertEquals(expected, actual);
@@ -41,7 +41,7 @@ public class ShortHostStrategyTest {
         String candidate = "google.co";
         boolean result = strategy.applyStrategy(host, candidate);
 
-        Assert.assertTrue(result);
+        Assert.assertFalse(result);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class ShortHostStrategyTest {
         String candidate = "google.coma";
         boolean result = strategy.applyStrategy(host, candidate);
 
-        Assert.assertFalse(result);
+        Assert.assertTrue(result);
     }
 
     @Test
@@ -75,6 +75,17 @@ public class ShortHostStrategyTest {
         boolean result = strategy.applyStrategy(host, candidate);
 
         Assert.assertFalse(result);
+    }
+
+    @Test
+    public void testRegexMatch_ShortHostStrategy_TyposquattPlus1Middle() {
+        ShortHostStrategy strategy = new ShortHostStrategy();
+
+        String host = "google.com";
+        String candidate = "googl1e.com";
+        boolean result = strategy.applyStrategy(host, candidate);
+
+        Assert.assertTrue(result);
     }
 
 }
