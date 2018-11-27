@@ -11,7 +11,6 @@ import java.util.Map;
 
 public class SwappedCharacterStrategyTest {
 
-    // TODO: Match Correct Length
     @Test
     public void SwappedCharacterStrategy_test1() {
         SwappedCharacterStrategy strategy = new SwappedCharacterStrategy();
@@ -56,7 +55,6 @@ public class SwappedCharacterStrategyTest {
         Assert.assertFalse(result);
     }
 
-    // TODO: Match Different Characters
     @Test
     public void SwappedCharacterStrategy_test5() {
         SwappedCharacterStrategy strategy = new SwappedCharacterStrategy();

@@ -43,7 +43,7 @@ public class IntegrationTest {
     }
 
     /**
-     * Run only when proxy is running and Typosquatting extension is enabled
+     * Run only when proxy is running, Typosquatting extension is enabled and test-whitelist.txt is loaded
      * @throws Exception
      */
     @Test
@@ -52,14 +52,14 @@ public class IntegrationTest {
             return;
         }
 
-        String expected = "<title>Google</title>";
-        String actual = makeRequest("http://google.com");
+        String expected = "<title>StealMyLogin.com - exposing the dangers of insecure login forms</title>";
+        String actual = makeRequest("http://stealmylogin.com");
 
         Assert.assertTrue(actual.contains(expected));
     }
 
     /**
-     * Run only when proxy is running and Typosquatting extension is enabled
+     * Run only when proxy is running, Typosquatting extension is enabled and test-whitelist.txt is loaded
      * @throws Exception
      */
     @Test
@@ -70,7 +70,7 @@ public class IntegrationTest {
 
         String expectedWong = "<title>Google</title>";
         String expected = "<title>Blocked by proxy</title>";
-        String actual = makeRequest("http://google.co");
+        String actual = makeRequest("http://google.com");
 
         Assert.assertFalse(actual.contains(expectedWong));
         Assert.assertTrue(actual.contains(expected));
