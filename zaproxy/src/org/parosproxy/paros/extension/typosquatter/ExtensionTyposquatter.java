@@ -9,26 +9,45 @@ import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.zaproxy.zap.view.ZapMenuItem;
 
-import javax.swing.*;
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
-import java.util.ArrayList;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyListener {
 
     public static final int PROXY_LISTENER_ORDER = 0;
     public static final String NAME = "ExtensionTyposquatter";
+    public static final String ADD_TO_WHITELIST_KEYWORD = "save=true";
 
     private boolean ON = false;
     private ZapMenuItem menuToolsFilter = null;
-    private TyposquattingService typosquattingService;
+    private ITyposquattingService typosquattingService;
+    private PersistanceService persistanceService;
+    private Path pathToWhitelist;
+
+
+
+    private ConcurrentHashMap<HttpMessage, Integer> requestCache;
+    private int requestCounter = 0;
 
     public ExtensionTyposquatter() {
         super();
         setOrder(777);
+        persistanceService = new TextFilePersistence();
+        requestCache = new ConcurrentHashMap<>();
+    }
+
+    public ExtensionTyposquatter(ITyposquattingService typosquattingService,
+                                 PersistanceService persistanceService) {
+        super();
+        setOrder(777);
+        this.persistanceService = persistanceService;
+        this.typosquattingService = typosquattingService;
+        requestCache = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -60,26 +79,24 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
     private ZapMenuItem getMenuToolsFilter() {
         if (menuToolsFilter == null) {
             menuToolsFilter = new ZapMenuItem("menu.tools.typosquatter");
-            menuToolsFilter.addActionListener(new java.awt.event.ActionListener() {
-                @Override
-                public void actionPerformed(java.awt.event.ActionEvent e) {
-                    if (!ON) {
-                        List<String> whitelist = getWhiteList();
-                        if (whitelist == null) {
-                            return; // dialog closed or malformed file
-                        }
-                        typosquattingService = new TyposquattingService(whitelist);
+
+            Model model = getModel();
+            ViewDelegate view = getView();
+            menuToolsFilter.addActionListener(e -> {
+                if (!ON) {
+                    File file = persistanceService.getWhitelistFile(model, view);
+                    this.pathToWhitelist = file.toPath();
+                    List<String> whiteList = persistanceService.getWhiteList(file);
+                    if (whiteList == null) {
+                        return; // dialog closed or malformed file
                     }
-                    ON = !ON;
+                    typosquattingService = new TyposquattingService(whiteList);
                 }
+                ON = !ON;
             });
 
         }
         return menuToolsFilter;
-    }
-
-    public TyposquattingResult isTypoInUrl(String candidate) {
-        return typosquattingService.checkCandidateHost(candidate);
     }
 
     @Override
@@ -88,37 +105,70 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
             return true;
         }
         String candidate = msg.getRequestHeader().getHostName();
-        if (isTypoInUrl(candidate).getResult()) {
-            throw new RuntimeException("ExtensionTyposquatter caught a typo.");
+        String body = msg.getRequestBody().toString();
+
+        if (body.contains(ADD_TO_WHITELIST_KEYWORD)) {
+            persistanceService.persistToWhitelist(candidate, this.pathToWhitelist);
+            typosquattingService.setWhiteList(
+                    persistanceService.parseWhitelistFile(this.pathToWhitelist.toFile()));
+
+            HttpMessage originalRequest = getRequestById(getRequestIdFromUri(body));
+            msg.setRequestHeader(originalRequest.getRequestHeader());
+            msg.setRequestBody(originalRequest.getRequestBody());
+
+            return true;
+        }
+
+        if (typosquattingService.checkCandidateHost(candidate).getResult()) {
+            putRequestInCache(msg);
+            throw new TyposquattingException("ExtensionTyposquatter caught a typo.");
         }
         return true;
     }
 
-    // TODO: optimize: don't run isTypoInUrl twice
-    // TODO: respect protocol (http vs https)
     @Override
     public boolean onHttpResponseReceive(HttpMessage msg) {
         if (!ON) {
             return true;
         }
         String candidate = msg.getRequestHeader().getHostName();
-        TyposquattingResult result = isTypoInUrl(candidate);
-        if (result.getResult()) {
-            setResponseBodyContent(msg, result.getPossibleHosts());
+        TyposquattingResult res = typosquattingService.checkCandidateHost(candidate);
+
+        if (res.getResult()) {
+            setResponseBodyContent(msg, candidate, this.requestCache.get(msg),
+                    res.getFailedStrategyNames());
         }
+
         return true;
     }
 
-    public void setResponseBodyContent(HttpMessage msg, Collection<String> hosts) {
+    public void setResponseBodyContent(HttpMessage msg, String host, int requestId,
+                                       Collection<String> failedStrategyNames) {
         ResultPage resultPage = new ResultPage();
+        msg.setResponseBody(resultPage.getBody(host, requestId, failedStrategyNames));
 
-        msg.setResponseBody(resultPage.getBody(hosts));
         try {
             msg.setResponseHeader(resultPage.getHeader());
         } catch (HttpMalformedHeaderException e) {
             e.printStackTrace();
         }
         msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+    }
+
+    public HttpMessage getRequestById(int id) {
+        HttpMessage originalRequest = this.requestCache.entrySet()
+                .stream()
+                .filter(entry -> Objects.equals(entry.getValue(), id))
+                .map(Map.Entry::getKey)
+                .findFirst()
+                .get();
+        return originalRequest;
+    }
+
+    public int getRequestIdFromUri(String uri) {
+        String requestIdParam = uri.substring(uri.indexOf("requestId"));
+        int requestId = Integer.parseInt(requestIdParam.substring(requestIdParam.indexOf("=")+1));
+        return requestId;
     }
 
     @Override
@@ -148,43 +198,27 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         return true;
     }
 
-    // TODO: handle malformed file
-    public List<String> getWhiteList() {
-        File whitelistFile = getWhitelistFile();
-        if (whitelistFile == null) {
-            return null; // Dialog closed
-        }
-
-        return parseWhitelistFile(whitelistFile);
+    public boolean isON() {
+        return ON;
     }
 
-    public File getWhitelistFile() {
-        JFileChooser chooser = new JFileChooser(getModel().getOptionsParam().getUserDirectory());
-        File file = null;
-
-        int rc = chooser.showSaveDialog(getView().getMainFrame());
-        if(rc == JFileChooser.APPROVE_OPTION) {
-            return chooser.getSelectedFile();
-        }
-        return file;
+    public void setON(boolean ON) {
+        this.ON = ON;
     }
 
-    // TODO: handle malformed file
-    public List<String> parseWhitelistFile(File file) {
-        List<String> whitelist = new ArrayList<>();
-        if (file == null) {
-            return whitelist;
-        }
+    public ConcurrentHashMap<HttpMessage, Integer> getRequestCache() {
+        return requestCache;
+    }
 
-        try (BufferedReader br = new BufferedReader(new FileReader(file))) {
-            String line;
-            while ((line = br.readLine()) != null) {
-                whitelist.add(line);
-            }
+    public int getRequestCounter() {
+        return requestCounter;
+    }
+
+    private void putRequestInCache(HttpMessage message) {
+        if (requestCounter >= Integer.MAX_VALUE - 1) {
+            requestCounter = 0;
+            this.requestCache.clear(); // primitive cache size management
         }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
-        return whitelist;
+        this.requestCache.put(message, requestCounter++);
     }
 }
