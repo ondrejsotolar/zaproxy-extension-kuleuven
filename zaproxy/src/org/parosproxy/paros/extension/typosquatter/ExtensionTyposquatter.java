@@ -28,6 +28,8 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
     private PersistanceService persistanceService;
     private Path pathToWhitelist;
 
+
+
     private ConcurrentHashMap<HttpMessage, Integer> requestCache;
     private int requestCounter = 0;
 
@@ -118,7 +120,7 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
         if (typosquattingService.checkCandidateHost(candidate).getResult()) {
             putRequestInCache(msg);
-            throw new RuntimeException("ExtensionTyposquatter caught a typo.");
+            throw new TyposquattingException("ExtensionTyposquatter caught a typo.");
         }
         return true;
     }
@@ -199,6 +201,14 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
     public void setON(boolean ON) {
         this.ON = ON;
+    }
+
+    public ConcurrentHashMap<HttpMessage, Integer> getRequestCache() {
+        return requestCache;
+    }
+
+    public int getRequestCounter() {
+        return requestCounter;
     }
 
     private void putRequestInCache(HttpMessage message) {

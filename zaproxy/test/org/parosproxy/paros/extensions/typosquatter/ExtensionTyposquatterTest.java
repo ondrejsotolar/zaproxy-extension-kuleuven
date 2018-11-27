@@ -1,13 +1,15 @@
 package org.parosproxy.paros.extensions.typosquatter;
 
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.internal.matchers.Any;
-import org.parosproxy.paros.extension.typosquatter.ExtensionTyposquatter;
-import org.parosproxy.paros.extension.typosquatter.ITyposquattingService;
-import org.parosproxy.paros.extension.typosquatter.PersistanceService;
-import org.parosproxy.paros.extension.typosquatter.TyposquattingResult;
+import org.parosproxy.paros.extension.typosquatter.*;
+import org.parosproxy.paros.network.HttpMalformedHeaderException;
+import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.network.HttpRequestHeader;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.zaproxy.zap.network.HttpRequestBody;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -19,40 +21,70 @@ import static org.mockito.Mockito.*;
 public class ExtensionTyposquatterTest {
 
     @Test
-    public void OkRequest() {
+    public void onHttpRequestSend_passingRequest() throws HttpMalformedHeaderException {
+        // setup services
+        String candidate = "google.com";
+
         ITyposquattingService mockTSservice = mock(ITyposquattingService.class);
+        when(mockTSservice.checkCandidateHost(candidate))
+                .thenReturn(new TyposquattingResult(candidate));
 
-        when(mockTSservice.checkCandidateHost("google.com"))
-                .thenReturn(new TyposquattingResult("google.com"));
-
-        TyposquattingResult catchResult = new TyposquattingResult("google.co");
-        catchResult.addFailedTyposquattingStrategy("google.com", "LongHostStrategy");
-        when(mockTSservice.checkCandidateHost("google.co"))
-                .thenReturn(catchResult);
-
-        ExtensionTyposquatter t = new ExtensionTyposquatter();
-        t.setON(true);
-
-        PersistanceService persistanceService = mock(PersistanceService.class);
-        when(persistanceService.getWhitelistFile(any(), any()))
+        PersistanceService mockPersistanceService = mock(PersistanceService.class);
+        when(mockPersistanceService.getWhitelistFile(any(), any()))
                 .thenReturn(new File(""));
 
-        List<String> whitelist = new ArrayList<>();
-        whitelist.add("google.com");
-        when(persistanceService.parseWhitelistFile(any()))
-                .thenReturn(whitelist);
+        ExtensionTyposquatter t = new ExtensionTyposquatter(
+                mockTSservice, mockPersistanceService);
+        t.setON(true);
 
+        HttpMessage msg = new HttpMessage();
+        msg.setRequestHeader(new HttpRequestHeader("GET /hello.htm HTTP/1.1\n" +
+                "Host: "+candidate));
 
+        // catch sent request
+        boolean result = t.onHttpRequestSend(msg);
 
+        // assert
+        Assert.assertTrue(result);
+        Assert.assertTrue(t.getRequestCache().isEmpty());
+        Assert.assertEquals(t.getRequestCounter(), 0);
     }
 
     @Test
-    public void typoRequest() {
+    public void onHttpRequestSend_typoRequest_returnResultPage() throws HttpMalformedHeaderException {
+        String candidate = "google.com";
 
-    }
+        ITyposquattingService mockTSservice = mock(ITyposquattingService.class);
+        TyposquattingResult result = new TyposquattingResult(candidate);
+        result.addFailedTyposquattingStrategy(candidate, "someStrategy");
+        when(mockTSservice.checkCandidateHost(candidate)).thenReturn(result);
 
-    @Test
-    public void previouslyTypoRequest() {
+        PersistanceService mockPersistanceService = mock(PersistanceService.class);
+        when(mockPersistanceService.getWhitelistFile(any(), any())).thenReturn(new File(""));
 
+        ExtensionTyposquatter t = new ExtensionTyposquatter(mockTSservice, mockPersistanceService);
+        t.setON(true);
+
+        HttpMessage msg = new HttpMessage();
+        msg.setRequestHeader(new HttpRequestHeader("GET /hello.htm HTTP/1.1\n" +
+                "Host: "+candidate));
+
+        // catch sent request
+        boolean thrown = false;
+        try {
+            t.onHttpRequestSend(msg);
+        }
+        catch (TyposquattingException e) {
+            thrown = true;
+        }
+
+        // assert
+        Assert.assertTrue(thrown);
+        Assert.assertTrue(t.getRequestCache().containsKey(msg));
+        Assert.assertEquals(t.getRequestCounter(), 1);
+
+        boolean result2 = t.onHttpResponseReceive(msg);
+        Assert.assertTrue(result2);
+        Assert.assertTrue(msg.getResponseBody().toString().contains("<title>Blocked by proxy</title>"));
     }
 }

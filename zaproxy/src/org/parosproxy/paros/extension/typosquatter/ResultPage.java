@@ -5,7 +5,8 @@ public class ResultPage {
     private String header = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8";
 
     private String body = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
-            "<title>Blocked by proxy</title></head><body><H1>Blocked by proxy!</H1>%s</body></html>";
+            "<title>Blocked by proxy</title></head><body><H1>Blocked by proxy!</H1>" +
+            "<p>Are you sure about the address? If yes, click below and you won't be bothered anymore.</p>%s</body></html>";
 
     private String proceedButton = "<form action=\"http://%s\" method=\"POST\">" +
             "<button type=\"submit\">Proceed to %s</button>" +
