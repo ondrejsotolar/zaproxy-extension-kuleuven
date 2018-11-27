@@ -32,4 +32,14 @@ public class TyposquattingResult {
     public boolean getResult() {
         return this.failedTyposquattingStrategies.size() > 0;
     }
+
+    public Collection<String> getFailedStrategyNames() {
+        Set<String> names = new HashSet<>();
+        for (Map.Entry<String, List<String>> entry: this.failedTyposquattingStrategies.entrySet()) {
+            for (String name: entry.getValue()) {
+                names.add(name);
+            }
+        }
+        return names;
+    }
 }

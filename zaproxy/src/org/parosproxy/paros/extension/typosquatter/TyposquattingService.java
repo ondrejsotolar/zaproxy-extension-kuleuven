@@ -1,6 +1,7 @@
 package org.parosproxy.paros.extension.typosquatter;
 
 import org.parosproxy.paros.extension.typosquatter.strategies.LongHostStrategy;
+import org.parosproxy.paros.extension.typosquatter.strategies.ShortHostStrategy;
 import org.parosproxy.paros.extension.typosquatter.strategies.SwappedCharacterStrategy;
 import org.parosproxy.paros.extension.typosquatter.strategies.ReplacedCharStrategy;
 
@@ -48,6 +49,7 @@ public class TyposquattingService implements ITyposquattingService {
         strategies = new ArrayList<>();
 
         strategies.add(new LongHostStrategy());
+        strategies.add(new ShortHostStrategy());
         strategies.add(new SwappedCharacterStrategy()); 
         strategies.add(new ReplacedCharStrategy());
     }

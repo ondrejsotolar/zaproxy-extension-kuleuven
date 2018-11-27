@@ -11,6 +11,7 @@ import org.zaproxy.zap.view.ZapMenuItem;
 
 import java.io.File;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -134,15 +135,17 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         TyposquattingResult res = typosquattingService.checkCandidateHost(candidate);
 
         if (res.getResult()) {
-            setResponseBodyContent(msg, candidate, this.requestCache.get(msg));
+            setResponseBodyContent(msg, candidate, this.requestCache.get(msg),
+                    res.getFailedStrategyNames());
         }
 
         return true;
     }
 
-    public void setResponseBodyContent(HttpMessage msg, String host, int requestId) {
+    public void setResponseBodyContent(HttpMessage msg, String host, int requestId,
+                                       Collection<String> failedStrategyNames) {
         ResultPage resultPage = new ResultPage();
-        msg.setResponseBody(resultPage.getBody(host, requestId));
+        msg.setResponseBody(resultPage.getBody(host, requestId, failedStrategyNames));
 
         try {
             msg.setResponseHeader(resultPage.getHeader());
