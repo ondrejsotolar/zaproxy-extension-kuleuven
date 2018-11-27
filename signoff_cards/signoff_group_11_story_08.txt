@@ -8,10 +8,10 @@ Number of unit tests:                      34
 Number of scenario tests:                  2
 Total test coverage:                       undecidable
 GIT commit identifier at start of story:   20e1b3950809aeb5617176107f8974371ccaef99
-GIT commit identifier at end of story      3609366acfcc12b8c7c94ca1ed94c2596b38a858
+GIT commit identifier at end of story      3d10d26694fd05ac405aa02eabd6f53bc34d1efb
 Time spent on user story:                  Ondrej Sotolar: 50h
                                            Aditya Paliwal: 15h
                                            Alexandre Arnould: 20h
                                            Dennis Lund: 20h
-Optional remarks:			   See also design documents: "class diagram, 2 sequence diagrams" in the solutions folder.
+Optional remarks:			   See also design documents: "class diagram, 2 sequence diagrams, test-whitelist.txt" in the solutions folder.
 
