@@ -16,7 +16,7 @@ public class ExtensionPhishingPrevention extends ExtensionTyposquatter {
         }
 
         // if (isControlRequest(msg)) {
-        //      set response body
+        //      // TODO: set response body
         //      return true;
         // }
 
