@@ -23,13 +23,11 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
     public static final String NAME = "ExtensionTyposquatter";
     public static final String ADD_TO_WHITELIST_KEYWORD = "save=true";
 
-    private boolean ON = false;
+    protected boolean ON = false;
     private ZapMenuItem menuToolsFilter = null;
     private ITyposquattingService typosquattingService;
     private PersistanceService persistanceService;
     private Path pathToWhitelist;
-
-
 
     private ConcurrentHashMap<HttpMessage, Integer> requestCache;
     private int requestCounter = 0;
@@ -119,8 +117,10 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
             return true;
         }
 
-        if (typosquattingService.checkCandidateHost(candidate).getResult()) {
-            putRequestInCache(msg);
+        TyposquattingResult res = typosquattingService.checkCandidateHost(candidate);
+        if (res.getResult()) {
+            setResponseBodyContent(msg, candidate, putRequestInCache(msg),
+                    res.getFailedStrategyNames());
             throw new TyposquattingException("ExtensionTyposquatter caught a typo.");
         }
         return true;
@@ -128,17 +128,6 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
     @Override
     public boolean onHttpResponseReceive(HttpMessage msg) {
-        if (!ON) {
-            return true;
-        }
-        String candidate = msg.getRequestHeader().getHostName();
-        TyposquattingResult res = typosquattingService.checkCandidateHost(candidate);
-
-        if (res.getResult()) {
-            setResponseBodyContent(msg, candidate, this.requestCache.get(msg),
-                    res.getFailedStrategyNames());
-        }
-
         return true;
     }
 
@@ -214,11 +203,12 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
         return requestCounter;
     }
 
-    private void putRequestInCache(HttpMessage message) {
+    private int putRequestInCache(HttpMessage message) {
         if (requestCounter >= Integer.MAX_VALUE - 1) {
             requestCounter = 0;
             this.requestCache.clear(); // primitive cache size management
         }
         this.requestCache.put(message, requestCounter++);
+        return this.requestCounter;
     }
 }
