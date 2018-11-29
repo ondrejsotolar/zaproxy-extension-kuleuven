@@ -1,6 +1,8 @@
 package org.parosproxy.paros.extension.typosquatter;
 
+import org.apache.log4j.Logger;
 import org.parosproxy.paros.core.proxy.ProxyListener;
+import org.parosproxy.paros.core.proxy.ProxyThread;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.ViewDelegate;
@@ -24,6 +26,8 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
     public static final String ADD_TO_WHITELIST_KEYWORD = "save=true";
 
     protected boolean ON = false;
+
+    private static Logger log = Logger.getLogger(ExtensionTyposquatter.class);
     private ZapMenuItem menuToolsFilter = null;
     private ITyposquattingService typosquattingService;
     private PersistanceService persistanceService;
@@ -116,12 +120,16 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
 
             return true;
         }
-
         TyposquattingResult res = typosquattingService.checkCandidateHost(candidate);
         if (res.getResult()) {
             setResponseBodyContent(msg, candidate, putRequestInCache(msg),
                     res.getFailedStrategyNames());
-            throw new TyposquattingException("ExtensionTyposquatter caught a typo.");
+
+            log.info("ExtensionTyposquatter caught a typo.");
+        } else {
+            persistanceService.persistToWhitelist(candidate, this.pathToWhitelist);
+            typosquattingService.setWhiteList(
+                    persistanceService.parseWhitelistFile(this.pathToWhitelist.toFile()));
         }
         return true;
     }
