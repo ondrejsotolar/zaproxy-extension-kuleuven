@@ -22,4 +22,8 @@ public class PasswordHygieneResult {
     public boolean getResult() {
         return this.failedStrategies.size() > 0;
     }
+
+    public List<String> getFailedStrategies() {
+        return failedStrategies;
+    }
 }

@@ -24,14 +24,14 @@ public class ExtensionPhishingPreventionTest {
                 .thenReturn(foundCredentials);
 
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
-        ExtensionPhishingPrevention t = new ExtensionPhishingPrevention(
+        ExtensionPhishingPrevention extension = new ExtensionPhishingPrevention(
                 mockCrecentialService, passwordHygieneService);
-        t.setON(true);
+        extension.setON(true);
 
         // run
         boolean thrown = false;
         try {
-            t.onHttpRequestSend(new HttpMessage());
+            extension.onHttpRequestSend(new HttpMessage());
         } catch (PhishingPreventionException e) {
             thrown = true;
         }
