@@ -6,14 +6,20 @@ import java.util.Map;
 
 public class PasswordHygieneResult {
 
-    private String password;
+    private Credentials credentials;
     private List<String> failedStrategies;
 
-    public PasswordHygieneResult(String password) {
-        this.password = password;
+    public PasswordHygieneResult(Credentials credentials) {
+
+        this.credentials = credentials;
+        this.failedStrategies = new ArrayList<>();
     }
 
-    public void addFailedTyposquattingStrategy(String name) {
+    public void addFailedStrategy(String name) {
         failedStrategies.add(name);
+    }
+
+    public boolean getResult() {
+        return this.failedStrategies.size() > 0;
     }
 }

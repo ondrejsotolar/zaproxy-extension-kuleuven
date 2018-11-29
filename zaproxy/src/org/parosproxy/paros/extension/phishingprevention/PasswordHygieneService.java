@@ -24,19 +24,17 @@ public class PasswordHygieneService implements IPasswordHygieneService {
     }
 
     @Override
-    public PasswordHygieneResult checkPasswordHygiene(String password) {
-        if (password == null || password.isEmpty()) {
+    public PasswordHygieneResult checkPasswordHygiene(Credentials credentials) {
+        if (credentials == null || credentials.getPassword() == null || credentials.getPassword().isEmpty()) {
             throw new RuntimeException("PasswordHygieneService.checkPasswordHygiene: empty or null password");
         }
+        PasswordHygieneResult result = new PasswordHygieneResult(credentials);
 
-        PasswordHygieneResult result = new PasswordHygieneResult(password);
-
-            for (PasswordHygieneStrategy strategy : strategies) {
-                boolean strategyFailed = strategy.applyStrategy(password);
-                if (strategyFailed) {
-                    result.addFailedTyposquattingStrategy(strategy.getName());
-                }
+        for (PasswordHygieneStrategy strategy : strategies) {
+            if (strategy.applyStrategy(credentials.getPassword())) {
+                result.addFailedStrategy(strategy.getName());
             }
+        }
         return result;
     }
 }
