@@ -68,7 +68,7 @@ public class LongHostStrategyTest {
 
     @Test
     public void myJavaPlayground() {
-        Map<String, List<String>> map = new HashMap();
+        Map<String, List<String>> map = new HashMap<>();
         Assert.assertTrue(map.size() == 0);
 
         List<String> list = new ArrayList<>();
