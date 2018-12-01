@@ -1,8 +1,5 @@
 package org.parosproxy.paros.extension.phishingprevention;
 
-import com.sun.jndi.toolkit.url.Uri;
-import org.apache.commons.httpclient.URI;
-import org.apache.commons.httpclient.URIException;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.GetRequestScanner;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.PostRequestScanner;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.RequestScanner;
@@ -43,21 +40,11 @@ public class RequestCredentialScannerService implements CredentialScanerService 
         return result;
     }
 
-
-
-    public boolean isAllowedMethod(String method) {
-        return method.equalsIgnoreCase(methodGet) || method.equalsIgnoreCase(methodPost);
-    }
-
-    public boolean isPost(HttpMessage message) {
-        return message.getRequestHeader().getMethod().equalsIgnoreCase(methodPost);
-    }
-
     public Credentials setCredentials(String host, Map<String, List<String>> queryParameters) {
         Credentials result = new Credentials();
         result.setHost(host);
 
-        for(Map.Entry<String, List<String>> parameter : queryParameters.entrySet()) {
+        for (Map.Entry<String, List<String>> parameter : queryParameters.entrySet()) {
             if (isUsername(parameter.getKey())) {
                 result.setUsername(parameter.getValue().get(0));
                 continue;
@@ -72,6 +59,14 @@ public class RequestCredentialScannerService implements CredentialScanerService 
             return null;
         }
         return result;
+    }
+
+    public boolean isAllowedMethod(String method) {
+        return method.equalsIgnoreCase(methodGet) || method.equalsIgnoreCase(methodPost);
+    }
+
+    public boolean isPost(HttpMessage message) {
+        return message.getRequestHeader().getMethod().equalsIgnoreCase(methodPost);
     }
 
     public boolean isPassword(String s) {
