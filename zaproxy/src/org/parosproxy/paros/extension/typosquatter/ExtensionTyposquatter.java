@@ -126,11 +126,9 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
                     res.getFailedStrategyNames());
 
             log.info("ExtensionTyposquatter caught a typo.");
-        } else {
-            persistanceService.persistToWhitelist(candidate, this.pathToWhitelist);
-            typosquattingService.setWhiteList(
-                    persistanceService.parseWhitelistFile(this.pathToWhitelist.toFile()));
         }
+        // TODO: implementation will continue in branch fix_typosquatter
+
         return true;
     }
 
