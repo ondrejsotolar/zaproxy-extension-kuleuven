@@ -7,6 +7,7 @@ import org.parosproxy.paros.extension.phishingprevention.IPasswordHygieneService
 import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneResult;
 import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneService;
 import org.parosproxy.paros.extension.phishingprevention.strategies.OnlyNumbersStrategy;
+import org.parosproxy.paros.extension.phishingprevention.strategies.CommonPasswordsStrategy;
 
 public class PhishingPreventionStrategiesTest {
 
@@ -26,7 +27,7 @@ public class PhishingPreventionStrategiesTest {
     //@Test TODO: implement
     public void isIn500WorstPasswords() {
 
-        //500WorstPasswordStrategy expectedStrategy = new 500WorstPasswordStrategy();
+        CommonPasswordsStrategy expectedStrategy = new CommonPasswordsStrategy();
         Credentials foundCredentials = new Credentials("host", "username", "123456789");
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
 
