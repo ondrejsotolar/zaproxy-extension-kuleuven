@@ -84,5 +84,16 @@ public class LongHostStrategyTest {
         list.add("1");
         map.put("key2", list);
         Assert.assertTrue(map.size() == 2);
+
+        Map<String, List<String>> queryParameters = new HashMap<>();
+        List<String> r1 = map.get("bbb");
+        Assert.assertNull(r1);
+
+        map.put("aaa", new ArrayList<String>());
+        List<String> r2 = map.get("aaa");
+        r2.add("val");
+        Assert.assertTrue(map.get("aaa").size() == 1);
+
+
     }
 }
