@@ -5,6 +5,9 @@ public class Credentials {
     private String username;
     private String password;
 
+    public Credentials() {
+    }
+
     public Credentials(String host, String username, String password) {
         this.host = host;
         this.username = username;
