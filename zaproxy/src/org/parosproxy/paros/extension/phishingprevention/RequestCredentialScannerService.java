@@ -2,7 +2,8 @@ package org.parosproxy.paros.extension.phishingprevention;
 
 import org.parosproxy.paros.extension.phishingprevention.requestscan.GetRequestScanner;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.PostRequestScanner;
-import org.parosproxy.paros.extension.phishingprevention.requestscan.RequestScanner;
+import org.parosproxy.paros.extension.phishingprevention.requestscan.RequestParamsScanner;
+import org.parosproxy.paros.extension.phishingprevention.requestscan.StringParamScanner;
 import org.parosproxy.paros.network.HttpMessage;
 
 import java.util.*;
@@ -18,8 +19,8 @@ public class RequestCredentialScannerService implements CredentialScanerService 
     private String[] usernameKeywords =
             new String[] { "uname", "user", "username" };
 
-    private RequestScanner requestScannerGet = new GetRequestScanner();
-    private RequestScanner requestScannerPost = new PostRequestScanner();
+    private RequestParamsScanner requestScannerGet = new GetRequestScanner();
+    private RequestParamsScanner requestScannerPost = new PostRequestScanner();
 
     @Override
     public Credentials getCredentialsInRequest(HttpMessage message) {
