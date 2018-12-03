@@ -16,10 +16,25 @@ public class CrackLibTestStrategy implements PasswordHygieneStrategy{
     }
 
     @Override
-    public boolean applyStrategy(String password) {
+    public boolean applyStrategy(String password){
 
+        String[] params = new String[4];
+        params[0] = "-check";
+        params[1] = "dictionary";
+        params[2] = password;
+        params[3] = null; //username
 
+        boolean testRes;
 
-        return result;
+        try {
+            CrackLib.main(params);
+            testRes = CrackLib.getBoolPasswordFailed();
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("CrackLib main failed to run. Args: " + params);
+            testRes = true;
+        }
+
+        return testRes;
     }
 }
