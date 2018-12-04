@@ -1,5 +1,6 @@
 package org.parosproxy.paros.extension.phishingprevention;
 
+import org.parosproxy.paros.extension.phishingprevention.strategies.CrackLibTestStrategy;
 import org.parosproxy.paros.extension.phishingprevention.strategies.OnlyNumbersStrategy;
 
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ public class PasswordHygieneService implements IPasswordHygieneService {
         strategies = new ArrayList<>();
 
         strategies.add(new OnlyNumbersStrategy());
+
+        strategies.add(new CrackLibTestStrategy());
     }
 
     public void setStrategies(List<PasswordHygieneStrategy> strategies) {
