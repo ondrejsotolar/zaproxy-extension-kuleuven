@@ -9,6 +9,7 @@ import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneResult;
 import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneService;
 import org.parosproxy.paros.extension.phishingprevention.strategies.CrackLibTestStrategy;
 import org.parosproxy.paros.extension.phishingprevention.strategies.OnlyNumbersStrategy;
+import org.parosproxy.paros.extension.phishingprevention.strategies.CommonPasswordsStrategy;
 
 public class PhishingPreventionStrategiesTest {
 
@@ -25,17 +26,17 @@ public class PhishingPreventionStrategiesTest {
         Assert.assertTrue(result.getFailedStrategies().contains(expectedStrategy.getName()));
     }
 
-    //@Test TODO: implement
+    @Test
     public void isIn500WorstPasswords() {
 
-        //500WorstPasswordStrategy expectedStrategy = new 500WorstPasswordStrategy();
-        Credentials foundCredentials = new Credentials("host", "username", "123456789");
+        CommonPasswordsStrategy expectedStrategy = new CommonPasswordsStrategy();
+        Credentials foundCredentials = new Credentials("host", "username", "amateur");
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
 
         PasswordHygieneResult result = passwordHygieneService.checkPasswordHygiene(foundCredentials);
 
         Assert.assertTrue(result.getResult());
-        //Assert.assertTrue(result.getFailedStrategies().contains(expectedStrategy.getName()));
+        Assert.assertTrue(result.getFailedStrategies().contains(expectedStrategy.getName()));
     }
 
     @Test
