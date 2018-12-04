@@ -214,7 +214,7 @@ public class ExtensionTyposquatter extends ExtensionAdaptor implements ProxyList
             requestCounter = 0;
             this.requestCache.clear(); // primitive cache size management
         }
-        this.requestCache.put(message, requestCounter++);
-        return this.requestCounter;
+        this.requestCache.put(message, requestCounter);
+        return this.requestCounter++;
     }
 }

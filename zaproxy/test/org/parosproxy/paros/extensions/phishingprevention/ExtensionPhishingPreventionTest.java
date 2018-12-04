@@ -63,4 +63,27 @@ public class ExtensionPhishingPreventionTest {
     }
 
 
+    @Test
+    public void stringParamTest() {
+        ExtensionPhishingPrevention extension = new ExtensionPhishingPrevention();
+        String body1 = "";
+        String body2 = "username=tom";
+        String body3 = "id=1";
+        String body4 = "username=tom&id=1";
+        String body5 = "username=tom&id=1&pass=123";
+
+        Assert.assertNull(extension.getParamStringFromBody(body1, "any"));
+        Assert.assertTrue(extension.getParamIntFromBody(body1, "any") == -1);
+
+        Assert.assertEquals("tom", extension.getParamStringFromBody(body2, "username"));
+
+        Assert.assertEquals(1, extension.getParamIntFromBody(body3, "id"));
+
+        Assert.assertEquals("tom", extension.getParamStringFromBody(body4, "username"));
+        Assert.assertEquals(1, extension.getParamIntFromBody(body4, "id"));
+
+        Assert.assertEquals("tom", extension.getParamStringFromBody(body5, "username"));
+        Assert.assertEquals(1, extension.getParamIntFromBody(body5, "id"));
+    }
+
 }

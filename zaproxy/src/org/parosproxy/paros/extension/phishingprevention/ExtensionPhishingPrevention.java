@@ -77,14 +77,14 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor implements Pro
             persistenceService.setAllowed(getParamStringFromBody(body, HOST_KEYWORD), true);
 
             // Creds are allowed by user & saved => return the original request
-            HttpMessage originalRequest = getRequestById(getParamValueFromBody(body, REQUEST_ID));
+            HttpMessage originalRequest = getRequestById(getParamIntFromBody(body, REQUEST_ID));
             msg.setRequestHeader(originalRequest.getRequestHeader());
             msg.setRequestBody(originalRequest.getRequestBody());
             return true;
         }
         else if (body.contains(CANCEL_KEYWORD)) {
             setResponseBodyForCancelPage(msg);
-            persistenceService.remove(getParamStringFromBody(body, REQUEST_ID));
+            persistenceService.remove(getParamStringFromBody(body, HOST_KEYWORD));
             return true;
         }
 
@@ -204,8 +204,8 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor implements Pro
             requestCounter = 0;
             this.requestCache.clear(); // primitive cache size management
         }
-        this.requestCache.put(message, requestCounter++);
-        return this.requestCounter;
+        this.requestCache.put(message, requestCounter);
+        return this.requestCounter++;
     }
 
     /*
@@ -244,16 +244,25 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor implements Pro
         return originalRequest;
     }
 
-    // TODO: fix index out of bounds
-    public int getParamValueFromBody(String body, String paramName) {
-        String requestIdParam = body.substring(body.indexOf(paramName));
-        int requestId = Integer.parseInt(requestIdParam.substring(requestIdParam.indexOf("=")+1));
+    public int getParamIntFromBody(String body, String paramName) {
+        String param = getParamStringFromBody(body, paramName);
+        if (param == null) {
+            return -1;
+        }
+        int requestId = Integer.parseInt(param.substring(param.indexOf("=")+1));
         return requestId;
     }
 
-    // TODO: fix index out of bounds
     public String getParamStringFromBody(String body, String paramName) {
-        String requestIdParam = body.substring(body.indexOf(paramName));
+        int beginIndex = body.indexOf(paramName);
+        if (beginIndex < 0) {
+            return null;
+        }
+        int endIndex = body.indexOf("&", beginIndex);
+        String requestIdParam = (endIndex >= 0)
+                ? body.substring(beginIndex, endIndex)
+                : body.substring(beginIndex);
+
         return requestIdParam.substring(requestIdParam.indexOf("=")+1);
     }
 }
