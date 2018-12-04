@@ -17,7 +17,7 @@ public class RequestCredentialScannerService implements CredentialScanerService 
             new String[] { "password", "pwd", "pass" };
 
     private String[] usernameKeywords =
-            new String[] { "uname", "user", "username" };
+            new String[] { "uname", "user", "username", "user_name" };
 
     private RequestParamsScanner requestScannerGet = new GetRequestScanner();
     private RequestParamsScanner requestScannerPost = new PostRequestScanner();
