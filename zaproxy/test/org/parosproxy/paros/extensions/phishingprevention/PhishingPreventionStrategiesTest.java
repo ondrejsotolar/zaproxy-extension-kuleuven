@@ -26,17 +26,17 @@ public class PhishingPreventionStrategiesTest {
         Assert.assertTrue(result.getFailedStrategies().contains(expectedStrategy.getName()));
     }
 
-    //@Test TODO: implement
+    @Test
     public void isIn500WorstPasswords() {
 
         CommonPasswordsStrategy expectedStrategy = new CommonPasswordsStrategy();
-        Credentials foundCredentials = new Credentials("host", "username", "123456789");
+        Credentials foundCredentials = new Credentials("host", "username", "amateur");
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
 
         PasswordHygieneResult result = passwordHygieneService.checkPasswordHygiene(foundCredentials);
 
         Assert.assertTrue(result.getResult());
-        //Assert.assertTrue(result.getFailedStrategies().contains(expectedStrategy.getName()));
+        Assert.assertTrue(result.getFailedStrategies().contains(expectedStrategy.getName()));
     }
 
     @Test
