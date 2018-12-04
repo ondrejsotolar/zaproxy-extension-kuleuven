@@ -58,6 +58,9 @@ public class PhishingPreventionStrategiesTest {
         testRes = clStrategy.applyStrategy("Elephant42");
         Assert.assertTrue(testRes);
 
+        testRes = clStrategy.applyStrategy("fE123123f");
+        Assert.assertTrue(testRes);
+
         testRes = clStrategy.applyStrategy("a2sdFGJ12");
         Assert.assertFalse(testRes);
 
