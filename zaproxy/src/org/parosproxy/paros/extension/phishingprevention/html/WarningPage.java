@@ -13,13 +13,13 @@ public class WarningPage {
     private String proceedButton = "<form action=\"http://%s\" method=\"POST\">" +
             "<button type=\"submit\">Proceed to %s</button>" +
             "<input type=\"hidden\" name=\"save\" value=\"true\" />" +
-            "<input type=\"hidden\" name=\"requestId\" value=\"%d\" />" +
+            "<input type=\"hidden\" name=\"request_id\" value=\"%d\" />" +
             "<input type=\"hidden\" name=\"host_address\" value=\"%s\" />" +
             "</form><br>";
     private String cancelButton = "<form action=\"http://%s\" method=\"POST\">" +
             "<button type=\"submit\">Cancel request %s</button>" +
             "<input type=\"hidden\" name=\"save\" value=\"false\" />" +
-            "<input type=\"hidden\" name=\"requestId\" value=\"%d\" />" +
+            "<input type=\"hidden\" name=\"request_id\" value=\"%d\" />" +
             "<input type=\"hidden\" name=\"host_address\" value=\"%s\" />" +
             "</form><br>";
 

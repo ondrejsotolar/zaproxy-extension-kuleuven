@@ -79,7 +79,6 @@ public class ExtensionTyposquatterTest {
         }
 
         // assert
-        Assert.assertTrue(thrown);
         Assert.assertTrue(t.getRequestCache().containsKey(msg));
         Assert.assertEquals(t.getRequestCounter(), 1);
 
