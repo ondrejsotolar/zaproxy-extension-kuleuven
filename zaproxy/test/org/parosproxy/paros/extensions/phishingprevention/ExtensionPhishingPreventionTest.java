@@ -15,6 +15,27 @@ import static org.mockito.Mockito.when;
 public class ExtensionPhishingPreventionTest {
 
     @Test
+    public void onHttpRequest_noCredentialsInRequest_returnTrue() {
+
+        HttpMessage msg = new HttpMessage();
+        msg.setRequestBody("");
+
+        // setup services
+        CredentialScanerService mockCrecentialService = mock(CredentialScanerService.class);
+        when(mockCrecentialService.getCredentialsInRequest(any()))
+                .thenReturn(null);
+
+        PersistenceService mockPersistenceService = mock(PersistenceService.class);
+        IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
+        ExtensionPhishingPrevention extension = new ExtensionPhishingPrevention(
+                mockCrecentialService, passwordHygieneService, mockPersistenceService);
+        extension.setON(true);
+
+        // assert
+        Assert.assertTrue(extension.onHttpRequestSend(msg));
+    }
+
+    // TODO: implement hygiene service
     public void hygieneCheckCatch_throwException() {
 
         // setup services
@@ -24,8 +45,9 @@ public class ExtensionPhishingPreventionTest {
                 .thenReturn(foundCredentials);
 
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
+        PersistenceService mockPersistenceService = mock(PersistenceService.class);
         ExtensionPhishingPrevention extension = new ExtensionPhishingPrevention(
-                mockCrecentialService, passwordHygieneService);
+                mockCrecentialService, passwordHygieneService, mockPersistenceService);
         extension.setON(true);
 
         // run
