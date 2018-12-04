@@ -29,11 +29,12 @@ public class CrackLib {
    * the Ganymede server.
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("org.solinger.cracklib.CrackLib");
+  static final TranslationService ts = TranslationService.getTranslationService("org.parosproxy.paros.extension.phishingprevention.CrackLib.CrackLib");
 
   public static final int MINDIFF = 5;
   public static final int MINLEN = 6;
   public static final int MAXSTEP = 4;
+    private static boolean passwordFailed;
 
   /**
    * Array of rules to apply to attempt to strip elementary
@@ -678,11 +679,13 @@ public class CrackLib {
 
 	    if (msg != null)
 	      {
+              passwordFailed = true;
 		System.out.println(msg);
 	      }
 	    else
 	      {
 		// "{0} looks good to me!"
+              passwordFailed = false;
 		System.out.println(ts.l("main.ok", args[2]));
 	      }
 	  }
@@ -704,5 +707,9 @@ public class CrackLib {
 	System.exit(1);
       }
   }
+
+    public static boolean getBoolPasswordFailed() {
+        return passwordFailed;
+    }
 }
 
