@@ -32,7 +32,7 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
     public final String HOST_KEYWORD = "host_address";
 
     protected boolean ON = true;
-    protected boolean hygieneON = false;
+    protected boolean hygieneON = true;
 
     private static Logger log = Logger.getLogger(ExtensionPhishingPrevention.class);
 
@@ -97,9 +97,13 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
         return true;
     }
 
-    public void setResponseBodyContent(HttpMessage msg, int requestId, String host) {
+    public void setResponseBodyContent(HttpMessage msg, int requestId, String host,
+                                       PasswordHygieneResult hygieneResult) {
         WarningPage warningPage = new WarningPage();
-        msg.setResponseBody(warningPage.getBody(requestId, host));
+
+        msg.setResponseBody((hygieneResult == null)
+                ? warningPage.getBody(requestId, host)
+                : warningPage.getBody(requestId, host, hygieneResult));
 
         try {
             msg.setResponseHeader(warningPage.getHeader());
@@ -169,7 +173,7 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
                 persistenceService.setAllowed(
                         credentialScannerService.getParamStringFromBody(body, HOST_KEYWORD), true);
 
-                // Creds are allowed by user & saved => return the original request
+                // credentials are allowed by user & saved => return the original request
                 HttpMessage originalRequest = getRequestById(
                         credentialScannerService.getParamIntFromBody(body, REQUEST_ID));
                 msg.setRequestHeader(originalRequest.getRequestHeader());
@@ -188,9 +192,15 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
                 return false;
             }
             StoredCredentials storedCredentials = persistenceService.get(requestCredentials.getHost());
-            if (storedCredentials == null) { // CONTROL REQUEST: new credentials
+            if (storedCredentials == null) { // new credentials -> return warning page
                 persistenceService.saveOrUpdate(requestCredentials, false);
-                setResponseBodyContent(msg, putRequestInCache(msg), requestCredentials.getHost());
+
+                PasswordHygieneResult hygieneResult = null;
+                if (hygieneON) {
+                    hygieneResult = passwordHygieneService.checkPasswordHygiene(requestCredentials);
+                }
+                setResponseBodyContent(msg, putRequestInCache(msg), requestCredentials.getHost(),
+                        hygieneResult);
 
                 log.info("ExtensionPhishingPrevention caught a request with credentials.");
                 return true;
@@ -199,8 +209,9 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
                 return false;
             }
             else {
-                throw new RuntimeException(
-                        "ExtensionPhishingPrevention: false in store: " + storedCredentials.getHost());
+                throw new IllegalStateException(
+                        "ExtensionPhishingPrevention: false value in store for host: "
+                                + storedCredentials.getHost());
             }
         }
 
