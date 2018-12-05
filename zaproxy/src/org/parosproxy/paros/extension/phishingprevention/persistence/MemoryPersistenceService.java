@@ -6,7 +6,7 @@ import org.parosproxy.paros.extension.phishingprevention.PersistenceService;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FilePersistenceService implements PersistenceService {
+public class MemoryPersistenceService implements PersistenceService {
 
     Map<String, StoredCredentials> store = new HashMap<>();
 
@@ -29,7 +29,7 @@ public class FilePersistenceService implements PersistenceService {
     public void setAllowed(String host, boolean allow) {
         StoredCredentials stored = store.get(host);
         if (stored == null) {
-            throw new RuntimeException("FilePersistenceService: not found: " + host);
+            throw new RuntimeException("MemoryPersistenceService: not found: " + host);
         } else {
             stored.setAllow(allow);
         }
