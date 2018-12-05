@@ -14,6 +14,7 @@ public class CommonPasswordsStrategy implements PasswordHygieneStrategy {
         return "CommonPasswordsStrategy";
     }
 
+    // TODO: change absolute path to relative
     @Override
     public boolean applyStrategy(String password) {
 

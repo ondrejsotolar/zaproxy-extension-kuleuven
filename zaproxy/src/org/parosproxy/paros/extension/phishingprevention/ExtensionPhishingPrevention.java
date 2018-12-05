@@ -34,7 +34,6 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
     protected boolean ON = true;
     protected boolean hygieneON = false;
 
-    private String securityKey = null;
     private static Logger log = Logger.getLogger(ExtensionPhishingPrevention.class);
 
     private ConcurrentHashMap<HttpMessage, Integer> requestCache;
@@ -61,7 +60,43 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
         requestCache = new ConcurrentHashMap<>();
     }
 
-    // TODO: remove localhost from form
+    @Override
+    public void init() {
+        this.setName(NAME);
+    }
+
+    @Override
+    public void initModel(Model model) { super.initModel(model); }
+
+    @Override
+    public void initView(ViewDelegate view) {
+        super.initView(view);
+    }
+
+    @Override
+    public void hook(ExtensionHook extensionHook) {
+        super.hook(extensionHook);
+        extensionHook.addOverrideMessageProxyListener(getNewOverrideListener());
+    }
+
+    @Override
+    public String getAuthor() {
+        return "ondrej.sotolar@gmail.com";
+    }
+
+    @Override
+    public String getUIName() {
+        return "ExtensionPhishingPrevention extension name";
+    }
+
+    /**
+     * No database tables used, so all supported
+     */
+    @Override
+    public boolean supportsDb(String type) {
+        return true;
+    }
+
     public void setResponseBodyContent(HttpMessage msg, int requestId, String host) {
         WarningPage warningPage = new WarningPage();
         msg.setResponseBody(warningPage.getBody(requestId, host));
@@ -86,58 +121,6 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
         msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
     }
 
-    public void setON(boolean ON) {
-        this.ON = ON;
-        this.securityKey = ""; // TODO: get security key
-    }
-
-    public boolean isON() {
-        return ON;
-    }
-
-    @Override
-    public String getAuthor() {
-        return null;
-    }
-
-    @Override
-    public String getUIName() {
-        return "ExtensionPhishingPrevention extension name";
-    }
-
-    @Override
-    public void init() {
-        this.setName(NAME);
-    }
-
-    @Override
-    public void initModel(Model model) {
-        // ZAP: changed to init(Model)
-        super.initModel(model);
-    }
-
-    @Override
-    public void initView(ViewDelegate view) {
-        super.initView(view);
-    }
-
-    @Override
-    public void hook(ExtensionHook extensionHook) {
-        super.hook(extensionHook);
-//        if (getView() != null) {
-//            extensionHook.getHookMenu().addToolsMenuItem(getMenuToolsFilter());
-//        }
-        extensionHook.addOverrideMessageProxyListener(getNewOverrideListener());
-    }
-
-    /**
-     * No database tables used, so all supported
-     */
-    @Override
-    public boolean supportsDb(String type) {
-        return true;
-    }
-
     private int putRequestInCache(HttpMessage message) {
         if (requestCounter >= Integer.MAX_VALUE - 1) {
             requestCounter = 0;
@@ -147,7 +130,6 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
         return this.requestCounter++;
     }
 
-    // TODO: put into a base class
     public HttpMessage getRequestById(int id) {
         HttpMessage originalRequest = this.requestCache.entrySet()
                 .stream()
@@ -158,26 +140,12 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
         return originalRequest;
     }
 
-    public int getParamIntFromBody(String body, String paramName) {
-        String param = getParamStringFromBody(body, paramName);
-        if (param == null) {
-            return -1;
-        }
-        int requestId = Integer.parseInt(param.substring(param.indexOf("=")+1));
-        return requestId;
+    public void setON(boolean ON) {
+        this.ON = ON;
     }
 
-    public String getParamStringFromBody(String body, String paramName) {
-        int beginIndex = body.indexOf(paramName);
-        if (beginIndex < 0) {
-            return null;
-        }
-        int endIndex = body.indexOf("&", beginIndex);
-        String requestIdParam = (endIndex >= 0)
-                ? body.substring(beginIndex, endIndex)
-                : body.substring(beginIndex);
-
-        return requestIdParam.substring(requestIdParam.indexOf("=")+1);
+    public boolean isON() {
+        return ON;
     }
 
     public OverrideMessageProxyListener getNewOverrideListener() {
@@ -198,17 +166,20 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
         public boolean onHttpRequestSend(HttpMessage msg) {
             String body = msg.getRequestBody().toString();
             if (body.contains(ADD_TO_WHITELIST_KEYWORD)) {
-                persistenceService.setAllowed(getParamStringFromBody(body, HOST_KEYWORD), true);
+                persistenceService.setAllowed(
+                        credentialScannerService.getParamStringFromBody(body, HOST_KEYWORD), true);
 
                 // Creds are allowed by user & saved => return the original request
-                HttpMessage originalRequest = getRequestById(getParamIntFromBody(body, REQUEST_ID));
+                HttpMessage originalRequest = getRequestById(
+                        credentialScannerService.getParamIntFromBody(body, REQUEST_ID));
                 msg.setRequestHeader(originalRequest.getRequestHeader());
                 msg.setRequestBody(originalRequest.getRequestBody());
                 return false;
             }
             else if (body.contains(CANCEL_KEYWORD)) {
                 setResponseBodyForCancelPage(msg);
-                persistenceService.remove(getParamStringFromBody(body, HOST_KEYWORD));
+                persistenceService.remove(
+                        credentialScannerService.getParamStringFromBody(body, HOST_KEYWORD));
                 return false;
             }
 

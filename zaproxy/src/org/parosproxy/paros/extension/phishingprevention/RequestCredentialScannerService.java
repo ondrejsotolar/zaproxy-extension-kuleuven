@@ -77,4 +77,26 @@ public class RequestCredentialScannerService implements CredentialScanerService 
     public boolean isUsername(String s) {
         return (Arrays.stream(this.usernameKeywords)).anyMatch(x -> s.contains(x));
     }
+
+    public int getParamIntFromBody(String body, String paramName) {
+        String param = getParamStringFromBody(body, paramName);
+        if (param == null) {
+            return -1;
+        }
+        int requestId = Integer.parseInt(param.substring(param.indexOf("=")+1));
+        return requestId;
+    }
+
+    public String getParamStringFromBody(String body, String paramName) {
+        int beginIndex = body.indexOf(paramName);
+        if (beginIndex < 0) {
+            return null;
+        }
+        int endIndex = body.indexOf("&", beginIndex);
+        String requestIdParam = (endIndex >= 0)
+                ? body.substring(beginIndex, endIndex)
+                : body.substring(beginIndex);
+
+        return requestIdParam.substring(requestIdParam.indexOf("=")+1);
+    }
 }

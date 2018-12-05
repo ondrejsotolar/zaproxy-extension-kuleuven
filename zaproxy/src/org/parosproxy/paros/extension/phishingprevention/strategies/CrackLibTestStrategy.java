@@ -15,6 +15,7 @@ public class CrackLibTestStrategy implements PasswordHygieneStrategy{
         return "CrackLibTestStrategy";
     }
 
+    // TODO: remove printout
     @Override
     public boolean applyStrategy(String password){
 
