@@ -8,7 +8,7 @@ import org.parosproxy.paros.extension.phishingprevention.CrackLib.*;
  */
 public class CrackLibTestStrategy implements PasswordHygieneStrategy{
 
-    boolean result;
+    String outMsg;
 
     @Override
     public String getName() {
@@ -30,6 +30,7 @@ public class CrackLibTestStrategy implements PasswordHygieneStrategy{
         try {
             CrackLib.main(params);
             testRes = CrackLib.getBoolPasswordFailed();
+            outMsg = CrackLib.getOutPutMsg();
         } catch (Exception e) {
             e.printStackTrace();
             System.out.println("CrackLib main failed to run. Args: " + params);
@@ -37,5 +38,9 @@ public class CrackLibTestStrategy implements PasswordHygieneStrategy{
         }
 
         return testRes;
+    }
+
+    public String getOutMsg(){
+        return outMsg;
     }
 }
