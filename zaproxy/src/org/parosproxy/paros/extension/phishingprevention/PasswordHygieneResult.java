@@ -13,7 +13,7 @@ public class PasswordHygieneResult {
     private Credentials credentials;
     private List<String> failedStrategies;
     private HashMap<String, List<String>> mapMsgFailedStrats;
-    private String CrackLibMsg;
+    private String crackLibMsg;
 
     public PasswordHygieneResult(Credentials credentials) {
 
@@ -35,7 +35,7 @@ public class PasswordHygieneResult {
     }
 
     public void makeMap(){
-        mapMsgFailedStrats.put(CrackLibMsg, failedStrategies);
+        mapMsgFailedStrats.put(crackLibMsg, failedStrategies);
     }
 
     public Map<String, List<String>> getMapMsgFailedStrats(){
@@ -43,6 +43,10 @@ public class PasswordHygieneResult {
     }
 
     public void setCrackLibMsg(String msg){
-        CrackLibMsg = msg;
+        crackLibMsg = msg;
+    }
+
+    public String getCrackLibMsg(){
+        return crackLibMsg;
     }
 }

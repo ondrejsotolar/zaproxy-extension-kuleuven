@@ -29,6 +29,10 @@ public class WarningPage {
             "<input type=\"hidden\" name=\"request_id\" value=\"%d\" />" +
             "<input type=\"hidden\" name=\"host_address\" value=\"%s\" />" +
             "</form><br>";
+    private String msgBox = "<div>" +
+            "CrackLib Test Output: " +
+            "%s" +
+            "</div>";
 
     public String getHeader() {
         return header;
@@ -44,11 +48,12 @@ public class WarningPage {
         return String.format(bodyWithHygiene,
                 getHygieneWarningMessage(hygieneResult),
                 getButton(proceedButton, "localhost", requestId, host),
-                getButton(cancelButton, "localhost", requestId, host));
+                getButton(cancelButton, "localhost", requestId, host),
+                getHygieneWarningMessage(hygieneResult));
     }
 
     private String getHygieneWarningMessage(PasswordHygieneResult hygieneResult) {
-        return "<p>Password hygiene results... TODO</p>";
+        return String.format(msgBox, hygieneResult.getCrackLibMsg());
     }
 
     public String getButton(String base, String candidate, int requestId, String host) {
