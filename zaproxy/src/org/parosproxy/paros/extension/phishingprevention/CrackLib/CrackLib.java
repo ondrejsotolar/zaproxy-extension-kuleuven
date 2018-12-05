@@ -35,6 +35,7 @@ public class CrackLib {
   public static final int MINLEN = 6;
   public static final int MAXSTEP = 4;
     private static boolean passwordFailed;
+    private static String outMsg;
 
   /**
    * Array of rules to apply to attempt to strip elementary
@@ -679,14 +680,17 @@ public class CrackLib {
 
 	    if (msg != null)
 	      {
+              // get msg here, so it can be used in PasswordHygiene
               passwordFailed = true;
-		System.out.println(msg);
+              outMsg = msg;
+              System.out.println(msg);
 	      }
 	    else
 	      {
 		// "{0} looks good to me!"
               passwordFailed = false;
-		System.out.println(ts.l("main.ok", args[2]));
+              outMsg = "This password looks good to me!";
+              System.out.println(ts.l("main.ok", "This password"));
 	      }
 	  }
 	finally
@@ -710,6 +714,10 @@ public class CrackLib {
 
     public static boolean getBoolPasswordFailed() {
         return passwordFailed;
+    }
+
+    public static String getOutPutMsg() {
+        return outMsg;
     }
 }
 
