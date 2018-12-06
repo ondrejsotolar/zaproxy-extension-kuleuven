@@ -11,38 +11,38 @@ import java.util.Map;
 public class PasswordHygieneResult {
 
     private Credentials credentials;
-    private List<String> failedStrategies;
-    private HashMap<String, List<String>> mapMsgFailedStrats;
-    private String CrackLibMsg;
+    //private List<String> failedStrategies;
+    private HashMap<String, List<String>> failedStrategies;
+    //private String CrackLibMsg;
 
     public PasswordHygieneResult(Credentials credentials) {
 
         this.credentials = credentials;
-        this.failedStrategies = new ArrayList<>();
-        this.mapMsgFailedStrats = new HashMap<String, List<String>>();
+        this.failedStrategies = new HashMap<>();
     }
 
-    public void addFailedStrategy(String name) {
-        failedStrategies.add(name);
+    public void addFailedStrategy(String name, List<String> reasons) {
+        failedStrategies.put(name, reasons);
     }
 
     public boolean getResult() {
-        return failedStrategies.size() > 0; // check the list aka the value of msg
+        return failedStrategies.size() > 0;
     }
 
-    public List<String> getFailedStrategies() {
+    public HashMap<String, List<String>> getFailedStrategies() {
         return failedStrategies;
     }
 
-    public void makeMap(){
-        mapMsgFailedStrats.put(CrackLibMsg, failedStrategies);
-    }
-
-    public Map<String, List<String>> getMapMsgFailedStrats(){
-        return mapMsgFailedStrats;
-    }
-
-    public void setCrackLibMsg(String msg){
-        CrackLibMsg = msg;
-    }
+    // TODO: delete
+//    public void makeMap(){
+//        mapMsgFailedStrats.put(CrackLibMsg, failedStrategies);
+//    }
+//
+//    public Map<String, List<String>> getMapMsgFailedStrats(){
+//        return mapMsgFailedStrats;
+//    }
+//
+//    public void setCrackLibMsg(String msg){
+//        CrackLibMsg = msg;
+//    }
 }
