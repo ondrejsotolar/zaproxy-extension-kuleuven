@@ -39,8 +39,14 @@ public class PasswordHygieneService implements IPasswordHygieneService {
         for (PasswordHygieneStrategy strategy : strategies) {
             if (strategy.applyStrategy(credentials.getPassword())) {
                 result.addFailedStrategy(strategy.getName());
+                if(strategy.getName() == "CrackLibTestStrategy"){
+                    CrackLibTestStrategy resStrat = new CrackLibTestStrategy();
+                    resStrat.applyStrategy(credentials.getPassword());
+                    result.setCrackLibMsg(resStrat.getOutMsg());
+                }
             }
         }
+        result.makeMap();
         return result;
     }
 }
