@@ -20,9 +20,7 @@ public class PasswordHygieneService implements IPasswordHygieneService {
 
         strategies.add(new OnlyNumbersStrategy());
         strategies.add(new CommonPasswordsStrategy());
-
-        // TODO: fix these
-        //strategies.add(new CrackLibTestStrategy());
+        strategies.add(new CrackLibTestStrategy());
     }
 
     public void setStrategies(List<PasswordHygieneStrategy> strategies) {
