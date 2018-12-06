@@ -5,6 +5,7 @@ import org.parosproxy.paros.extension.phishingprevention.PersistenceService;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.io.FileWriter;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,16 +46,37 @@ public class MemoryPersistenceService implements PersistenceService {
         store.remove(host);
     }
 
+    public static void saveToFile(String newEntry){
+        try {
+            FileWriter writer = new FileWriter("test.csv");
+            writer.append(newEntry);
+            writer.append(",");
+            writer.append(newEntry);
+            writer.append(",");
+            writer.append(newEntry);
+            writer.append(",");
+            writer.append(newEntry);
+            writer.append("/n");
+
+            writer.flush();
+            writer.close();
+        }
+        catch (Exception e){
+            e.printStackTrace();
+        }
+    }
+
     public static void main(String[] args) {
         System.out.println(System.getProperty("user.dir"));
+        saveToFile("hej");
         try {
             bufferedReader = new BufferedReader(new FileReader("test.csv"));
-            while ((line = bufferedReader.readLine()) != null){
+            while ((line = bufferedReader.readLine()) != null) {
                 String[] gr = line.split(cvsSplitBy);
                 System.out.println("host: " + gr[0] + " user: " + gr[1] + " pass: " + gr[2] + " isAllowed: " + gr[3]);
             }
-        }
-        catch (Exception e) {
+            bufferedReader.close();
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
