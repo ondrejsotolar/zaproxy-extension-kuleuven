@@ -2,17 +2,21 @@ package org.parosproxy.paros.extension.phishingprevention.html;
 
 import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneResult;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class WarningPage {
     private String header = "HTTP/1.1 200 OK\r\nContent-Type: text/html; charset=utf-8";
 
     private String body = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
             "<title>Blocked by proxy</title></head><body><H1>Blocked by proxy!</H1>" +
-            "<p>Login detected! TODO: state reason...</p>" +
+            "<H3>Login attempt detected!</H3>" +
             "%s%s</body></html>";
 
     private String bodyWithHygiene = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
             "<title>Blocked by proxy</title></head><body><H1>Blocked by proxy!</H1>" +
-            "<p>Login detected! TODO: state reason...</p>" +
+            "<H3>Login attempt detected!</H3>" +
             "%s%s%s</body></html>";
 
     private String proceedButtonBase = "<form action=\"http://%s\" method=\"POST\">" +
@@ -27,6 +31,7 @@ public class WarningPage {
             "<input type=\"hidden\" name=\"request_id\" value=\"%d\" />" +
             "<input type=\"hidden\" name=\"host_address\" value=\"%s\" />" +
             "</form><br>";
+    private String hygieneListBase = "<p>Password hygiene fail reasons:<br/><ul>%s</ul></p>";
 
     public String getHeader() {
         return header;
@@ -46,7 +51,14 @@ public class WarningPage {
     }
 
     private String getHygieneWarningMessage(PasswordHygieneResult hygieneResult) {
-        return "<p>Password hygiene results... TODO</p>";
+        if (hygieneResult.getFailedStrategies().size() <=0) {
+            return "";
+        }
+        String rows = "";
+        for (Map.Entry<String, List<String>> entry : hygieneResult.getFailedStrategies().entrySet()) {
+            rows += "<li>" + entry.getValue().get(0) + "</li>";
+        }
+        return String.format(hygieneListBase, rows);
     }
 
     public String getProceedButton(String candidate, int requestId, String host) {

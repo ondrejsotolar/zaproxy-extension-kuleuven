@@ -26,7 +26,7 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
 
     public final int PROXY_LISTENER_ORDER = 0;
     public final String NAME = "ExtensionPhishingPrevention";
-    public final String ADD_TO_WHITELIST_KEYWORD = "save=true"; // TODO: add extension ID to recognize by other extensions
+    public final String CREDENTIALS_ALLOWED_KEYWORD = "save=true"; // TODO: add extension ID to recognize by other extensions
     public final String CANCEL_KEYWORD = "save=false";
     public final String REQUEST_ID = "request_id";
     public final String HOST_KEYWORD = "host_address";
@@ -169,11 +169,11 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
         @Override
         public boolean onHttpRequestSend(HttpMessage msg) {
             String body = msg.getRequestBody().toString();
-            if (body.contains(ADD_TO_WHITELIST_KEYWORD)) {
+
+            if (body.contains(CREDENTIALS_ALLOWED_KEYWORD)) { // save & return the original request
                 persistenceService.setAllowed(
                         credentialScannerService.getParamStringFromBody(body, HOST_KEYWORD), true);
 
-                // credentials are allowed by user & saved => return the original request
                 HttpMessage originalRequest = getRequestById(
                         credentialScannerService.getParamIntFromBody(body, REQUEST_ID));
                 msg.setRequestHeader(originalRequest.getRequestHeader());

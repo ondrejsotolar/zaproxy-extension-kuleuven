@@ -15,6 +15,11 @@ public class OnlyNumbersStrategy implements PasswordHygieneStrategy {
     }
 
     @Override
+    public String getMessage() {
+        return "Password only uses numbers";
+    }
+
+    @Override
     public boolean applyStrategy(String password) {
         Matcher matcher = this.pattern.matcher(password);
 
