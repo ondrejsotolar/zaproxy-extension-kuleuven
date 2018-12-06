@@ -30,8 +30,7 @@ public class WarningPage {
             "<input type=\"hidden\" name=\"host_address\" value=\"%s\" />" +
             "</form><br>";
     private String msgBox = "<div>" +
-            "CrackLib Test Output: " +
-            "%s" +
+            "<h2> CrackLib Test Output: %s </h2>" +
             "</div>";
 
     public String getHeader() {
