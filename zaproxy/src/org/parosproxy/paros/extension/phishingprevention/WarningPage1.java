@@ -13,7 +13,7 @@ public class WarningPage1 {
 
     private String body = "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\">" +
             "<title>Warning</title></head><body><H1>WARNING !!!</H1>" +
-            "<p>Are you sure about the address? If yes, click below and you won't be bothered anymore.</p>" +
+            "<p></p>" +
             "<p>Failed typosquatting strategies:%s</p>%s</body></html>";
 
 
