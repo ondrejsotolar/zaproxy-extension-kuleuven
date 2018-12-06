@@ -2,7 +2,8 @@ package org.parosproxy.paros.extension.phishingprevention;
 
 import org.parosproxy.paros.extension.phishingprevention.requestscan.GetRequestScanner;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.PostRequestScanner;
-import org.parosproxy.paros.extension.phishingprevention.requestscan.RequestScanner;
+import org.parosproxy.paros.extension.phishingprevention.requestscan.RequestParamsScanner;
+import org.parosproxy.paros.extension.phishingprevention.requestscan.StringParamScanner;
 import org.parosproxy.paros.network.HttpMessage;
 
 import java.util.*;
@@ -16,10 +17,10 @@ public class RequestCredentialScannerService implements CredentialScanerService 
             new String[] { "password", "pwd", "pass" };
 
     private String[] usernameKeywords =
-            new String[] { "uname", "user", "username" };
+            new String[] { "uname", "user", "username", "user_name" };
 
-    private RequestScanner requestScannerGet = new GetRequestScanner();
-    private RequestScanner requestScannerPost = new PostRequestScanner();
+    private RequestParamsScanner requestScannerGet = new GetRequestScanner();
+    private RequestParamsScanner requestScannerPost = new PostRequestScanner();
 
     @Override
     public Credentials getCredentialsInRequest(HttpMessage message) {
@@ -75,5 +76,27 @@ public class RequestCredentialScannerService implements CredentialScanerService 
 
     public boolean isUsername(String s) {
         return (Arrays.stream(this.usernameKeywords)).anyMatch(x -> s.contains(x));
+    }
+
+    public int getParamIntFromBody(String body, String paramName) {
+        String param = getParamStringFromBody(body, paramName);
+        if (param == null) {
+            return -1;
+        }
+        int requestId = Integer.parseInt(param.substring(param.indexOf("=")+1));
+        return requestId;
+    }
+
+    public String getParamStringFromBody(String body, String paramName) {
+        int beginIndex = body.indexOf(paramName);
+        if (beginIndex < 0) {
+            return null;
+        }
+        int endIndex = body.indexOf("&", beginIndex);
+        String requestIdParam = (endIndex >= 0)
+                ? body.substring(beginIndex, endIndex)
+                : body.substring(beginIndex);
+
+        return requestIdParam.substring(requestIdParam.indexOf("=")+1);
     }
 }
