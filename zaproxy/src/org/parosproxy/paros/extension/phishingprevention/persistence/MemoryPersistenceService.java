@@ -3,12 +3,18 @@ package org.parosproxy.paros.extension.phishingprevention.persistence;
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
 import org.parosproxy.paros.extension.phishingprevention.PersistenceService;
 
+import java.io.BufferedReader;
+import java.io.FileReader;
 import java.util.HashMap;
 import java.util.Map;
 
 public class MemoryPersistenceService implements PersistenceService {
 
     Map<String, StoredCredentials> store = new HashMap<>();
+
+    static BufferedReader bufferedReader = null;
+    static String line = "";
+    static String cvsSplitBy = ",";
 
     @Override
     public StoredCredentials get(String host) {
@@ -37,5 +43,19 @@ public class MemoryPersistenceService implements PersistenceService {
 
     public void remove(String host) {
         store.remove(host);
+    }
+
+    public static void main(String[] args) {
+        System.out.println(System.getProperty("user.dir"));
+        try {
+            bufferedReader = new BufferedReader(new FileReader("test.csv"));
+            while ((line = bufferedReader.readLine()) != null){
+                String[] gr = line.split(cvsSplitBy);
+                System.out.println("host: " + gr[0] + " user: " + gr[1] + " pass: " + gr[2] + " isAllowed: " + gr[3]);
+            }
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }
