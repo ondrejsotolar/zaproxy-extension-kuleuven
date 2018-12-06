@@ -31,7 +31,9 @@ public class WarningPage {
             "<input type=\"hidden\" name=\"request_id\" value=\"%d\" />" +
             "<input type=\"hidden\" name=\"host_address\" value=\"%s\" />" +
             "</form><br>";
+
     private String hygieneListBase = "<p>Password hygiene fail reasons:<br/><ul>%s</ul></p>";
+
 
     public String getHeader() {
         return header;
@@ -51,12 +53,12 @@ public class WarningPage {
     }
 
     private String getHygieneWarningMessage(PasswordHygieneResult hygieneResult) {
-        if (hygieneResult.getFailedStrategies().size() <=0) {
+        if (hygieneResult.getMapMsgFailedStrategies().keySet().size() <=0) {
             return "";
         }
         String rows = "";
-        for (Map.Entry<String, List<String>> entry : hygieneResult.getFailedStrategies().entrySet()) {
-            rows += "<li>" + entry.getValue().get(0) + "</li>";
+        for (Map.Entry<String, String> entry : hygieneResult.getMapMsgFailedStrategies().entrySet()) {
+            rows += "<li>" + entry.getValue() + "</li>";
         }
         return String.format(hygieneListBase, rows);
     }
