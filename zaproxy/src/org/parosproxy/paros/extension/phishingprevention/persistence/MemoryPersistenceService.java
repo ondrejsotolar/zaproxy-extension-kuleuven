@@ -44,7 +44,7 @@ public class MemoryPersistenceService implements PersistenceService {
         store.remove(host);
     }
 
-   public static void saveToFile(Credentials credentials, String allow) {
+  /* public static void saveToFile(Credentials credentials, String allow) {
        try {
            FileWriter writer = new FileWriter("test.csv", true);
            writer.append(credentials.getHost());
@@ -77,6 +77,26 @@ public class MemoryPersistenceService implements PersistenceService {
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }*/
+
+    public static void main(String[] args) {
+
+        char[] pass ;
+        pass = new char[]{'P', 'a', 's', 's', 'w', 'o', 'r','d'};
+
+        byte[] newpass =  hashedPasswords.hash(pass,hashedPasswords.getNextSalt());
+       System.out.println(newpass);
+
+        try {
+            FileWriter writer = new FileWriter("test.csv", true);
+            writer.append(new String(newpass));
+
+            writer.flush();
+            writer.close();
+
+    } catch (Exception e) {
+        e.printStackTrace();
+    }
     }
 
 
