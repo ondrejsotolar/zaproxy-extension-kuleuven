@@ -34,7 +34,6 @@ public class CrackLib {
   public static final int MINDIFF = 5;
   public static final int MINLEN = 6;
   public static final int MAXSTEP = 4;
-    private static boolean passwordFailed;
     private static String outMsg;
 
   /**
@@ -681,16 +680,14 @@ public class CrackLib {
 	    if (msg != null)
 	      {
               // get msg here, so it can be used in PasswordHygiene
-              passwordFailed = true;
               outMsg = msg;
-              System.out.println(msg);
+              //System.out.println(msg);
 	      }
 	    else
 	      {
-		// "{0} looks good to me!"
-              passwordFailed = false;
-              outMsg = "This password looks good to me!";
-              System.out.println(ts.l("main.ok", "This password"));
+		// "{0} looks good to me!" outMsg is null
+              outMsg = new String();
+              //System.out.println(ts.l("main.ok", "This password"));
 	      }
 	  }
 	finally
@@ -711,10 +708,6 @@ public class CrackLib {
 	System.exit(1);
       }
   }
-
-    public static boolean getBoolPasswordFailed() {
-        return passwordFailed;
-    }
 
     public static String getOutPutMsg() {
         return outMsg;

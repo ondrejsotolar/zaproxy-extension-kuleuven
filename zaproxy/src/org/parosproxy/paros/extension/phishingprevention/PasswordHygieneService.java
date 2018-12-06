@@ -19,10 +19,10 @@ public class PasswordHygieneService implements IPasswordHygieneService {
         strategies = new ArrayList<>();
 
         strategies.add(new OnlyNumbersStrategy());
+        strategies.add(new CommonPasswordsStrategy());
 
         // TODO: fix these
         //strategies.add(new CrackLibTestStrategy());
-        //strategies.add(new CommonPasswordsStrategy());
     }
 
     public void setStrategies(List<PasswordHygieneStrategy> strategies) {
@@ -37,16 +37,11 @@ public class PasswordHygieneService implements IPasswordHygieneService {
         PasswordHygieneResult result = new PasswordHygieneResult(credentials);
 
         for (PasswordHygieneStrategy strategy : strategies) {
-            if (strategy.applyStrategy(credentials.getPassword())) {
-                result.addFailedStrategy(strategy.getName());
-                if(strategy.getName() == "CrackLibTestStrategy"){
-                    CrackLibTestStrategy resStrat = new CrackLibTestStrategy();
-                    resStrat.applyStrategy(credentials.getPassword());
-                    result.setCrackLibMsg(resStrat.getOutMsg());
-                }
+            if (strategy.applyStrategy(credentials.getPassword()) != null) {
+                String reason = strategy.applyStrategy(credentials.getPassword());
+                result.addMsgFailedStrategy(strategy.getName(), reason);
             }
         }
-        result.makeMap();
         return result;
     }
 }

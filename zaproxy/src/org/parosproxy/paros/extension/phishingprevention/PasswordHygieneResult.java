@@ -1,52 +1,29 @@
 package org.parosproxy.paros.extension.phishingprevention;
 
-import org.parosproxy.paros.extension.phishingprevention.CrackLib.CrackLib;
-import org.parosproxy.paros.extension.phishingprevention.requestscan.StringParamScanner;
-
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class PasswordHygieneResult {
 
     private Credentials credentials;
-    private List<String> failedStrategies;
-    private HashMap<String, List<String>> mapMsgFailedStrats;
-    private String crackLibMsg;
+
+    private HashMap<String, String> mapMsgfailedStrategies;
 
     public PasswordHygieneResult(Credentials credentials) {
 
         this.credentials = credentials;
-        this.failedStrategies = new ArrayList<>();
-        this.mapMsgFailedStrats = new HashMap<String, List<String>>();
+        this.mapMsgfailedStrategies = new HashMap<>();
     }
 
-    public void addFailedStrategy(String name) {
-        failedStrategies.add(name);
+    public void addMsgFailedStrategy(String name, String reason) {
+        mapMsgfailedStrategies.put(name, reason);
     }
 
     public boolean getResult() {
-        return failedStrategies.size() > 0; // check the list aka the value of msg
+        return mapMsgfailedStrategies.size() > 0;
     }
 
-    public List<String> getFailedStrategies() {
-        return failedStrategies;
+    public HashMap<String, String> getMapMsgFailedStrategies() {
+        return mapMsgfailedStrategies;
     }
 
-    public void makeMap(){
-        mapMsgFailedStrats.put(crackLibMsg, failedStrategies);
-    }
-
-    public Map<String, List<String>> getMapMsgFailedStrats(){
-        return mapMsgFailedStrats;
-    }
-
-    public void setCrackLibMsg(String msg){
-        crackLibMsg = msg;
-    }
-
-    public String getCrackLibMsg(){
-        return crackLibMsg;
-    }
 }
