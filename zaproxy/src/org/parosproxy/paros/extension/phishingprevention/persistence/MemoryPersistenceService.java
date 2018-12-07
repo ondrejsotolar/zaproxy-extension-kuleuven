@@ -64,8 +64,8 @@ public class MemoryPersistenceService implements PersistenceService {
        }
    }*/
 
-    /*public static void main(String[] args) {
-        System.out.println(System.getProperty("user.dir"));
+    public void readFIle() {
+        //System.out.println(System.getProperty("user.dir"));
       try {
 
             bufferedReader = new BufferedReader(new FileReader("test.csv"));
@@ -77,29 +77,31 @@ public class MemoryPersistenceService implements PersistenceService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }*/
+    }
 
-    public static void main(String[] args) {
+    public void saveToFile(Credentials credentials, Boolean allowed) {
 
-        char[] pass ;
-        pass = new char[]{'P', 'a', 's', 's', 'w', 'o', 'r','d'};
+       // char[] pass1 ;
+       // pass1 = new char[]{'P', 'a', 's', 's', 'w', 'o', 'r','d'};
 
-        String getHost = new String("dummyHost");
-        String Username = new String("dummyUsername");
-        String allow = new String("Yes");
+        String password = credentials.getPassword();
+        char p = password.charAt(0);  // returns 'l'
+        char[] pass = password.toCharArray();
+
 
         byte[] newpass =  hashedPasswords.hash(pass,hashedPasswords.getNextSalt());
       // System.out.println(newpass);
 
         try {
             FileWriter writer = new FileWriter("test.csv", true);
-            writer.append(getHost);
+
+            writer.append(credentials.getHost());
             writer.append(",");
-            writer.append(Username);
+            writer.append(credentials.getUsername());
             writer.append(",");
             writer.append(new String(newpass));
             writer.append(",");
-            writer.append(allow);
+            writer.append(allowed.toString());
             writer.append("\n");
 
             writer.flush();
