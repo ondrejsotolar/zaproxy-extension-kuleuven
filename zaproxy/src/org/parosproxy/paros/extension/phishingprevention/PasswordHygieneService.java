@@ -20,16 +20,13 @@ public class PasswordHygieneService implements IPasswordHygieneService {
 
         strategies.add(new OnlyNumbersStrategy());
         strategies.add(new CommonPasswordsStrategy());
-
-        // TODO: fix these
-        //strategies.add(new CrackLibTestStrategy());
+        strategies.add(new CrackLibTestStrategy());
     }
 
     public void setStrategies(List<PasswordHygieneStrategy> strategies) {
         this.strategies = strategies;
     }
 
-    // TODO: Fix for cracklib
     @Override
     public PasswordHygieneResult checkPasswordHygiene(Credentials credentials) {
         if (credentials == null || credentials.getPassword() == null || credentials.getPassword().isEmpty()) {
@@ -38,10 +35,9 @@ public class PasswordHygieneService implements IPasswordHygieneService {
         PasswordHygieneResult result = new PasswordHygieneResult(credentials);
 
         for (PasswordHygieneStrategy strategy : strategies) {
-            if (strategy.applyStrategy(credentials.getPassword())) {
-                List<String> reasons = new ArrayList<>();
-                reasons.add(strategy.getMessage());
-                result.addFailedStrategy(strategy.getName(), reasons);
+            if (strategy.applyStrategy(credentials.getPassword()) != null) {
+                String reason = strategy.applyStrategy(credentials.getPassword());
+                result.addMsgFailedStrategy(strategy.getName(), reason);
             }
         }
         return result;
