@@ -7,6 +7,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.parosproxy.paros.extension.phishingprevention.*;
 import org.parosproxy.paros.extension.phishingprevention.persistence.MemoryPersistenceService;
+import org.parosproxy.paros.extension.phishingprevention.requestscan.OverrideListener;
 import org.parosproxy.paros.network.HttpMessage;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -26,15 +27,15 @@ public class ExtensionPhishingPreventionTest {
 
         PersistenceService mockPersistenceService = mock(PersistenceService.class);
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
-        ExtensionPhishingPrevention extension = new ExtensionPhishingPrevention(
+        OverrideListener overrideListener = new OverrideListener(
                 mockCrecentialService, passwordHygieneService, mockPersistenceService);
-        extension.setON(true);
+        overrideListener.setON(true);
 
         HttpMessage msg = new HttpMessage();
         msg.setRequestBody("");
 
         // assert
-        Assert.assertFalse(extension.getNewOverrideListener().onHttpRequestSend(msg));
+        Assert.assertFalse(overrideListener.onHttpRequestSend(msg));
     }
 
     @Test
@@ -49,28 +50,29 @@ public class ExtensionPhishingPreventionTest {
 
         PersistenceService memoryPersistenceService = new MemoryPersistenceService();
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
-        ExtensionPhishingPrevention extension = new ExtensionPhishingPrevention(
+        OverrideListener overrideListener = new OverrideListener(
                 mockCrecentialService, passwordHygieneService, memoryPersistenceService);
-        extension.setON(true);
+        overrideListener.setON(true);
 
         HttpMessage msg = new HttpMessage();
         msg.setRequestBody("");
 
         // assert
-        Assert.assertTrue(extension.getRequestCache().size() == 0);
-        Assert.assertTrue(extension.getNewOverrideListener().onHttpRequestSend(msg));
-        Assert.assertTrue(extension.getRequestCache().size() == 1);
-        Assert.assertTrue(extension.getRequestCache().containsKey(msg));
+        Assert.assertTrue(overrideListener.getRequestCache().getRequestCache().size() == 0);
+        Assert.assertTrue(overrideListener.onHttpRequestSend(msg));
+        Assert.assertTrue(overrideListener.getRequestCache().getRequestCache().size() == 1);
+        Assert.assertTrue(overrideListener.getRequestCache().getRequestCache().containsKey(msg));
 
-        Assert.assertTrue(memoryPersistenceService.get(requestCreds.getHost()).isAllow() == false);
+        Assert.assertTrue(memoryPersistenceService.get(requestCreds.getHost()).isHostWhitelisted() == false);
 
         String reqParam = "<input type=\"hidden\" name=\"%s\" value=\"%d\" />";
         Assert.assertTrue(msg.getResponseBody().toString().contains(
-                String.format(reqParam, extension.REQUEST_ID, extension.getRequestCounter()-1)));
+                String.format(reqParam, overrideListener.REQUEST_ID,
+                        overrideListener.getRequestCache().getRequestCounter()-1)));
 
         String hostParam = "<input type=\"hidden\" name=\"%s\" value=\"%s\" />";
         Assert.assertTrue(msg.getResponseBody().toString().contains(
-                String.format(hostParam, extension.HOST_KEYWORD, requestCreds.getHost())));
+                String.format(hostParam, overrideListener.HOST_KEYWORD, requestCreds.getHost())));
     }
 
     @Test
@@ -104,14 +106,14 @@ public class ExtensionPhishingPreventionTest {
 
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
         PersistenceService mockPersistenceService = mock(PersistenceService.class);
-        ExtensionPhishingPrevention extension = new ExtensionPhishingPrevention(
+        OverrideListener overrideListener = new OverrideListener(
                 mockCrecentialService, passwordHygieneService, mockPersistenceService);
-        extension.setON(true);
+        overrideListener.setON(true);
 
         // run
         boolean thrown = false;
         try {
-            extension.getNewOverrideListener().onHttpRequestSend(new HttpMessage());
+            overrideListener.onHttpRequestSend(new HttpMessage());
         } catch (PhishingPreventionException e) {
             thrown = true;
         }

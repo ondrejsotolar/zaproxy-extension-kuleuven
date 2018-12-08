@@ -21,17 +21,17 @@ public class MemoryPersistenceService implements PersistenceService {
         if (stored == null) {
             store.put(credentials.getHost(), new StoredCredentials(credentials, allow));
         } else {
-            stored.setAllow(allow);
+            stored.setHostWhitelisted(allow);
         }
     }
 
     @Override
-    public void setAllowed(String host, boolean allow) {
+    public void setHostWhitelisted(String host, boolean allow) {
         StoredCredentials stored = store.get(host);
         if (stored == null) {
             throw new RuntimeException("MemoryPersistenceService: not found: " + host);
         } else {
-            stored.setAllow(allow);
+            stored.setHostWhitelisted(allow);
         }
     }
 

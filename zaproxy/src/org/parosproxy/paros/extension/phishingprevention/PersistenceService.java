@@ -8,7 +8,7 @@ public interface PersistenceService {
 
     void saveOrUpdate(Credentials credentials, boolean allow);
 
-    void setAllowed(String host, boolean allow);
+    void setHostWhitelisted(String host, boolean allow);
 
     void remove(String host);
 }
