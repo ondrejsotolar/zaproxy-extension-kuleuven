@@ -65,19 +65,14 @@ public class CommonPasswordsStrategy implements PasswordHygieneStrategy {
     }
 
     @Override
-    public String getMessage() {
-        return "Password is one of the 500 most commonly used";
-    }
-
-    @Override
-    public boolean applyStrategy(String password) {
+    public String applyStrategy(String password) {
 
         for (String s: commonPasswords) {
             if (s.equals(password)) {
-                return true;
+                return "Password is one of the 500 most commonly used";
             }
         }
-        return false;
+        return new String();
 
         // TODO: delete
 //        Scanner s = null;
