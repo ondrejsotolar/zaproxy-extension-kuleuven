@@ -4,21 +4,25 @@ import org.apache.log4j.Logger;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
+import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.extension.ViewDelegate;
 import org.parosproxy.paros.extension.phishingprevention.html.CancelPage;
 import org.parosproxy.paros.extension.phishingprevention.html.WarningPage;
+import org.parosproxy.paros.extension.phishingprevention.optionsdialog.OptionsDialog;
+import org.parosproxy.paros.extension.phishingprevention.optionsdialog.PhishingPreventionParam;
 import org.parosproxy.paros.extension.phishingprevention.persistence.MemoryPersistenceService;
 import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCredentials;
 import org.parosproxy.paros.model.Model;
+import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.view.View;
 
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ExtensionPhishingPrevention extends ExtensionAdaptor {
+public class ExtensionPhishingPrevention extends ExtensionAdaptor implements OptionsChangedListener {
 
     public CredentialScanerService credentialScannerService;
     public IPasswordHygieneService passwordHygieneService;
@@ -38,7 +42,8 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
 
     private ConcurrentHashMap<HttpMessage, Integer> requestCache;
     private int requestCounter = 0;
-    private Path pathToWhitelist;
+    private PhishingPreventionParam phishingPreventionParam;
+    private OptionsDialog optionsDialog;
 
     public ExtensionPhishingPrevention() {
         super();
@@ -77,6 +82,12 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
     public void hook(ExtensionHook extensionHook) {
         super.hook(extensionHook);
         extensionHook.addOverrideMessageProxyListener(getNewOverrideListener());
+        extensionHook.addOptionsParamSet(getPhishingPreventionParam());
+        extensionHook.addOptionsChangedListener(this);
+        if (View.isInitialised()) {
+            extensionHook.getHookView().addOptionPanel(
+                    getOptionsDialog());
+        }
     }
 
     @Override
@@ -95,6 +106,20 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
     @Override
     public boolean supportsDb(String type) {
         return true;
+    }
+
+    private PhishingPreventionParam getPhishingPreventionParam() {
+        if (this.phishingPreventionParam == null) {
+            this.phishingPreventionParam = new PhishingPreventionParam();
+        }
+        return this.phishingPreventionParam;
+    }
+
+    private OptionsDialog getOptionsDialog() {
+        if (optionsDialog == null) {
+            optionsDialog = new OptionsDialog(this);
+        }
+        return optionsDialog;
     }
 
     public void setResponseBodyContent(HttpMessage msg, int requestId, String host,
@@ -162,6 +187,12 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
 
     public int getRequestCounter() {
         return requestCounter;
+    }
+
+    @Override
+    public void optionsChanged(OptionsParam optionsParam) {
+        boolean isSecure = this.getPhishingPreventionParam().isSecure();
+        boolean isHygiene = this.getPhishingPreventionParam().isHygiene();
     }
 
     private class OverrideListener implements OverrideMessageProxyListener {
