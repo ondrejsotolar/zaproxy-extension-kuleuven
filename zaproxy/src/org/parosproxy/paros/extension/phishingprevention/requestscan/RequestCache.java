@@ -10,6 +10,7 @@ public class RequestCache {
 
     private ConcurrentHashMap<HttpMessage, Integer> requestCache = new ConcurrentHashMap<>();
     private int requestCounter = 0;
+    private int cacheSize = 65535;
 
     public HttpMessage getRequestById(int id) {
         HttpMessage originalRequest = this.requestCache.entrySet()
@@ -22,9 +23,8 @@ public class RequestCache {
     }
 
     public int putRequestInCache(HttpMessage message) {
-        if (requestCounter >= Integer.MAX_VALUE - 1) {
+        if (requestCounter >= cacheSize) {
             requestCounter = 0;
-            this.requestCache.clear(); // primitive cache size management
         }
         this.requestCache.put(message, requestCounter);
         return this.requestCounter++;
