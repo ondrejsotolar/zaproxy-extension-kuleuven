@@ -1,11 +1,15 @@
 package org.parosproxy.paros.extension.phishingprevention.requestscan;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class QueryStringParamScanner implements StringParamScanner {
+
+    private static Logger log = Logger.getLogger(QueryStringParamScanner.class);
 
     @Override
     public Map<String, List<String>> getRequestParams(String queryString) {
@@ -17,7 +21,7 @@ public class QueryStringParamScanner implements StringParamScanner {
             Map<String, List<String>> queryParameters = getParameters(queryString);
             return queryParameters;
         } catch (Exception e) {
-            e.printStackTrace();
+            log.info("Malformed query string: " + queryString);
         }
         return null;
     }

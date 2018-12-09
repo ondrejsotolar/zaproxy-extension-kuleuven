@@ -41,7 +41,7 @@ public class WarningPage {
 
     public String getBody(int requestId, String host) {
         return String.format(body,
-                getProceedButton("localhost", requestId, host),
+                getProceedButton(host, requestId, host),
                 getCancelButton("localhost", requestId, host));
     }
 

@@ -29,19 +29,19 @@ public class CrackLib {
    * the Ganymede server.
    */
 
-  static final TranslationService ts = TranslationService.getTranslationService("org.parosproxy.paros.extension.phishingprevention.CrackLib.CrackLib");
+  TranslationService ts = TranslationService.getTranslationService("org.parosproxy.paros.extension.phishingprevention.CrackLib.CrackLib");
 
-  public static final int MINDIFF = 5;
-  public static final int MINLEN = 6;
-  public static final int MAXSTEP = 4;
-    private static String outMsg;
+  public final int MINDIFF = 5;
+  public final int MINLEN = 6;
+  public final int MAXSTEP = 4;
+  private String outMsg;
 
   /**
    * Array of rules to apply to attempt to strip elementary
    * conversions away when doing dictionary checks.
    */
 
-  public static final String[] destructors = new String[] {
+  public final String[] destructors = new String[] {
     ":",                        // noop - must do this to test raw word.
 
     "[",                        // trimming leading/trailing junk
@@ -409,7 +409,7 @@ public class CrackLib {
     "/4s4a",
     "/4s4h"};
 
-  public static final String[] constructors = {
+  public String[] constructors = {
     ":",
     "r",
     "d",
@@ -418,7 +418,7 @@ public class CrackLib {
     "fr",
     "rf"};
 
-  public static final boolean gTry(String rawtext, String password)
+  public boolean gTry(String rawtext, String password)
   {
     /* use destructors to turn password into rawtext */
     /* note use of Reverse() to save duplicating all rules */
@@ -469,7 +469,7 @@ public class CrackLib {
    * @param username The username that we're approving the password for.  May be null.
    */
 
-  public static final String fascistLook(Packer p, String password, String username) throws IOException
+  public String fascistLook(Packer p, String password, String username) throws IOException
   {
     if (password.length() < 4)
       {
@@ -654,12 +654,12 @@ public class CrackLib {
     return null;
   }
 
-  public static final void usage()
+  public void usage()
   {
     System.err.println("CrackLib -check <password> | -check <password> <username> | -dump <dict> | -make <dict> <wordlist> | -find <dict> <word>");
   }
 
-  public static void main(String[] args) throws Exception
+  public void run(String[] args) throws Exception
   {
     if ((args.length == 3 || args.length == 4) && args[0].equals("-check"))
       {
@@ -681,13 +681,11 @@ public class CrackLib {
 	      {
               // get msg here, so it can be used in PasswordHygiene
               outMsg = msg;
-              //System.out.println(msg);
 	      }
 	    else
 	      {
 		// "{0} looks good to me!" outMsg is null
-              outMsg = new String();
-              //System.out.println(ts.l("main.ok", "This password"));
+              outMsg = null;
 	      }
 	  }
 	finally
@@ -709,7 +707,7 @@ public class CrackLib {
       }
   }
 
-    public static String getOutPutMsg() {
+    public String getOutPutMsg() {
         return outMsg;
     }
 }
