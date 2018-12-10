@@ -4,60 +4,37 @@ import org.apache.log4j.Logger;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
+import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.extension.ViewDelegate;
 import org.parosproxy.paros.extension.phishingprevention.html.CancelPage;
 import org.parosproxy.paros.extension.phishingprevention.html.WarningPage;
+import org.parosproxy.paros.extension.phishingprevention.optionsdialog.OptionsDialog;
+import org.parosproxy.paros.extension.phishingprevention.optionsdialog.PhishingPreventionParam;
 import org.parosproxy.paros.extension.phishingprevention.persistence.MemoryPersistenceService;
 import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCredentials;
+import org.parosproxy.paros.extension.phishingprevention.requestscan.OverrideListener;
 import org.parosproxy.paros.model.Model;
+import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
+import org.parosproxy.paros.view.View;
 
-import java.nio.file.Path;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 
-public class ExtensionPhishingPrevention extends ExtensionAdaptor {
+public class ExtensionPhishingPrevention extends ExtensionAdaptor implements OptionsChangedListener {
 
-    public CredentialScanerService credentialScannerService;
-    public IPasswordHygieneService passwordHygieneService;
-    public PersistenceService persistenceService;
-
-    public final int PROXY_LISTENER_ORDER = 0;
     public final String NAME = "ExtensionPhishingPrevention";
-    public final String CREDENTIALS_ALLOWED_KEYWORD = "save=true"; // TODO: add extension ID to recognize by other extensions
-    public final String CANCEL_KEYWORD = "save=false";
-    public final String REQUEST_ID = "request_id";
-    public final String HOST_KEYWORD = "host_address";
 
-    protected boolean ON = true;
-    protected boolean hygieneON = true;
-
-    private static Logger log = Logger.getLogger(ExtensionPhishingPrevention.class);
-
-    private ConcurrentHashMap<HttpMessage, Integer> requestCache;
-    private int requestCounter = 0;
-    private Path pathToWhitelist;
+    private PhishingPreventionParam phishingPreventionParam;
+    private OptionsDialog optionsDialog;
+    private OverrideListener overrideListener;
 
     public ExtensionPhishingPrevention() {
         super();
         setOrder(778);
-        this.credentialScannerService = new RequestCredentialScannerService();
-        this.passwordHygieneService = new PasswordHygieneService();
-        this.persistenceService = new MemoryPersistenceService();
-        requestCache = new ConcurrentHashMap<>();
-    }
-
-    public ExtensionPhishingPrevention(CredentialScanerService credentialScannerService,
-                                       IPasswordHygieneService passwordHygieneService,
-                                       PersistenceService persistenceService) {
-        super();
-        setOrder(778);
-        this.credentialScannerService = credentialScannerService;
-        this.passwordHygieneService = passwordHygieneService;
-        this.persistenceService = persistenceService;
-        requestCache = new ConcurrentHashMap<>();
+        overrideListener = new OverrideListener();
     }
 
     @Override
@@ -76,7 +53,13 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
     @Override
     public void hook(ExtensionHook extensionHook) {
         super.hook(extensionHook);
-        extensionHook.addOverrideMessageProxyListener(getNewOverrideListener());
+        extensionHook.addOverrideMessageProxyListener(overrideListener);
+        extensionHook.addOptionsParamSet(getPhishingPreventionParam());
+        extensionHook.addOptionsChangedListener(this);
+        if (View.isInitialised()) {
+            extensionHook.getHookView().addOptionPanel(
+                    getOptionsDialog());
+        }
     }
 
     @Override
@@ -97,132 +80,23 @@ public class ExtensionPhishingPrevention extends ExtensionAdaptor {
         return true;
     }
 
-    public void setResponseBodyContent(HttpMessage msg, int requestId, String host,
-                                       PasswordHygieneResult hygieneResult) {
-        WarningPage warningPage = new WarningPage();
+    @Override
+    public void optionsChanged(OptionsParam optionsParam) {
+        overrideListener.setON(this.getPhishingPreventionParam().isSecure());
+        overrideListener.setHygieneON(this.getPhishingPreventionParam().isHygiene());
+    }
 
-        msg.setResponseBody((hygieneResult == null)
-                ? warningPage.getBody(requestId, host)
-                : warningPage.getBody(requestId, host, hygieneResult));
-
-        try {
-            msg.setResponseHeader(warningPage.getHeader());
-        } catch (HttpMalformedHeaderException e) {
-            e.printStackTrace();
+    private PhishingPreventionParam getPhishingPreventionParam() {
+        if (this.phishingPreventionParam == null) {
+            this.phishingPreventionParam = new PhishingPreventionParam();
         }
-        msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
+        return this.phishingPreventionParam;
     }
 
-    public void setResponseBodyForCancelPage(HttpMessage msg) {
-        CancelPage cancelPage = new CancelPage();
-        msg.setResponseBody(cancelPage.getBody());
-
-        try {
-            msg.setResponseHeader(cancelPage.getHeader());
-        } catch (HttpMalformedHeaderException e) {
-            e.printStackTrace();
+    private OptionsDialog getOptionsDialog() {
+        if (optionsDialog == null) {
+            optionsDialog = new OptionsDialog(this);
         }
-        msg.getResponseHeader().setContentLength(msg.getResponseBody().length());
-    }
-
-    private int putRequestInCache(HttpMessage message) {
-        if (requestCounter >= Integer.MAX_VALUE - 1) {
-            requestCounter = 0;
-            this.requestCache.clear(); // primitive cache size management
-        }
-        this.requestCache.put(message, requestCounter);
-        return this.requestCounter++;
-    }
-
-    public HttpMessage getRequestById(int id) {
-        HttpMessage originalRequest = this.requestCache.entrySet()
-                .stream()
-                .filter(entry -> Objects.equals(entry.getValue(), id))
-                .map(Map.Entry::getKey)
-                .findFirst()
-                .get();
-        return originalRequest;
-    }
-
-    public void setON(boolean ON) {
-        this.ON = ON;
-    }
-
-    public boolean isON() {
-        return ON;
-    }
-
-    public OverrideMessageProxyListener getNewOverrideListener() {
-        return new OverrideListener();
-    }
-
-    public ConcurrentHashMap<HttpMessage, Integer> getRequestCache() {
-        return requestCache;
-    }
-
-    public int getRequestCounter() {
-        return requestCounter;
-    }
-
-    private class OverrideListener implements OverrideMessageProxyListener {
-
-        @Override
-        public boolean onHttpRequestSend(HttpMessage msg) {
-            String body = msg.getRequestBody().toString();
-
-            if (body.contains(CREDENTIALS_ALLOWED_KEYWORD)) { // save & return the original request
-                persistenceService.setAllowed(
-                        credentialScannerService.getParamStringFromBody(body, HOST_KEYWORD), true);
-
-                HttpMessage originalRequest = getRequestById(
-                        credentialScannerService.getParamIntFromBody(body, REQUEST_ID));
-                msg.setRequestHeader(originalRequest.getRequestHeader());
-                msg.setRequestBody(originalRequest.getRequestBody());
-                return false;
-            }
-            else if (body.contains(CANCEL_KEYWORD)) {
-                setResponseBodyForCancelPage(msg);
-                persistenceService.remove(
-                        credentialScannerService.getParamStringFromBody(body, HOST_KEYWORD));
-                return false;
-            }
-
-            Credentials requestCredentials = credentialScannerService.getCredentialsInRequest(msg);
-            if (requestCredentials == null) {
-                return false;
-            }
-            StoredCredentials storedCredentials = persistenceService.get(requestCredentials.getHost());
-            if (storedCredentials == null) { // new credentials -> return warning page
-                persistenceService.saveOrUpdate(requestCredentials, false);
-
-                PasswordHygieneResult hygieneResult = null;
-                if (hygieneON) {
-                    hygieneResult = passwordHygieneService.checkPasswordHygiene(requestCredentials);
-                }
-                setResponseBodyContent(msg, putRequestInCache(msg), requestCredentials.getHost(),
-                        hygieneResult);
-
-                log.info("ExtensionPhishingPrevention caught a request with credentials.");
-                return true;
-            }
-            if (storedCredentials.isAllow()) { // Allow only one credentials per host
-                return false;
-            }
-            else {
-                throw new IllegalStateException(
-                        "ExtensionPhishingPrevention: false value in store for host: "
-                                + storedCredentials.getHost());
-            }
-        }
-
-        @Override
-        public boolean onHttpResponseReceived(HttpMessage msg) {
-            return true;
-        }
-
-        @Override
-        public int getArrangeableListenerOrder() {
-            return 0;
-        }
+        return optionsDialog;
     }
 }

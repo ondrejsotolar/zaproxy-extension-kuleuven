@@ -1,5 +1,6 @@
 package org.parosproxy.paros.extension.phishingprevention.strategies;
 
+import org.apache.log4j.Logger;
 import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneStrategy;
 import org.parosproxy.paros.extension.phishingprevention.CrackLib.*;
 
@@ -8,13 +9,14 @@ import org.parosproxy.paros.extension.phishingprevention.CrackLib.*;
  */
 public class CrackLibTestStrategy implements PasswordHygieneStrategy{
 
+    private static Logger log = Logger.getLogger(CrackLibTestStrategy.class);
+    private CrackLib crackLib = new CrackLib();
+
     @Override
     public String getName() {
         return "CrackLibTestStrategy";
     }
 
-
-    // TODO: remove ALL printouts !!!
     @Override
     public String applyStrategy(String password){
 
@@ -24,17 +26,13 @@ public class CrackLibTestStrategy implements PasswordHygieneStrategy{
         params[2] = password;
         params[3] = null; //username
 
-        String outMsg;
-
+        String outMsg = null;
         try {
-            CrackLib.main(params);
-            outMsg = CrackLib.getOutPutMsg();
+            crackLib.run(params);
+            outMsg = crackLib.getOutPutMsg();
         } catch (Exception e) {
-            e.printStackTrace();
-            System.out.println("CrackLib main failed to run. Args: " + params);
-            outMsg = new String();
+            log.info("CrackLib main failed to run. Args: " + params);
         }
-
         return outMsg;
     }
 }

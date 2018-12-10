@@ -21,9 +21,6 @@ public class OnlyNumbersStrategy implements PasswordHygieneStrategy {
         if(matcher.matches()){
             return "Password only uses numbers";
         }
-        else
-        {
-            return new String();
-        }
+        return null;
     }
 }

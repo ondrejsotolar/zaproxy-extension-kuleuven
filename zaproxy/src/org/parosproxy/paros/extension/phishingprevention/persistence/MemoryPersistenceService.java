@@ -2,6 +2,7 @@ package org.parosproxy.paros.extension.phishingprevention.persistence;
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
 import org.parosproxy.paros.extension.phishingprevention.PersistenceService;
 
+<<<<<<< HEAD
 import java.io.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -14,34 +15,65 @@ public class MemoryPersistenceService implements PersistenceService {
     static String line = "";
     static String cvsSplitBy = ",";
 
+=======
+import java.util.*;
+
+public class MemoryPersistenceService implements PersistenceService {
+
+    List<StoredCredentials> store = new ArrayList<>();
+    PasswordHashingService hashingService = new SimpleHashingService();
+>>>>>>> master
 
     @Override
-    public StoredCredentials get(String host) {
-        return store.get(host);
+    public StoredCredentials get(String host, String username) {
+
+        Optional<StoredCredentials> found = this.store
+                .stream()
+                .filter(sc -> host.equals(sc.getHost()) && username.equals(sc.getUsername()))
+                .findFirst();
+
+        StoredCredentials result = found.isPresent()
+                ? found.get()
+                : null;
+
+        return result;
     }
 
     @Override
-    public void saveOrUpdate(Credentials credentials, boolean allow) {
-        StoredCredentials stored = store.get(credentials.getHost());
-        if (stored == null) {
-            store.put(credentials.getHost(), new StoredCredentials(credentials, allow));
-        } else {
-            stored.setAllow(allow);
+    public void saveOrUpdate(Credentials credentials, boolean whitelistHost, boolean ignoreHygiene) {
+        StoredCredentials stored = get(credentials.getHost(), credentials.getUsername());
+        if (stored != null) {
+            store.remove(stored);
+        }
+        StoredCredentials newRecord = new StoredCredentials(credentials, whitelistHost, ignoreHygiene);
+        newRecord.hashPassword(hashingService);
+        store.add(newRecord);
+    }
+
+    @Override
+    public void remove(String host, String username) {
+        StoredCredentials stored = get(host, username);
+        if (stored != null) {
+            store.remove(stored);
         }
     }
 
-    @Override
-    public void setAllowed(String host, boolean allow) {
-        StoredCredentials stored = store.get(host);
-        if (stored == null) {
-            throw new RuntimeException("MemoryPersistenceService: not found: " + host);
-        } else {
-            stored.setAllow(allow);
-        }
-    }
+//    @Override
+//    public PasswordHashingService getPasswordHashingService() {
+//        return this.hashingService;
+//    }
 
-    public void remove(String host) {
-        store.remove(host);
+    @Override
+    public void updatePassword(Credentials requestCredentials, StoredCredentials storedCredentials) {
+        boolean isSame = hashingService
+                .check(requestCredentials.getPassword(), storedCredentials.getPassword());
+
+        if (!isSame) {
+            saveOrUpdate(
+                    requestCredentials,
+                    storedCredentials.isHostWhitelisted(),
+                    storedCredentials.isHygieneWhitelisted());
+        }
     }
 
 }

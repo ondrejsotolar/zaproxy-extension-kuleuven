@@ -35,8 +35,8 @@ public class PasswordHygieneService implements IPasswordHygieneService {
         PasswordHygieneResult result = new PasswordHygieneResult(credentials);
 
         for (PasswordHygieneStrategy strategy : strategies) {
-            if (strategy.applyStrategy(credentials.getPassword()) != null) {
-                String reason = strategy.applyStrategy(credentials.getPassword());
+            String reason = strategy.applyStrategy(credentials.getPassword());
+            if (reason != null) {
                 result.addMsgFailedStrategy(strategy.getName(), reason);
             }
         }
