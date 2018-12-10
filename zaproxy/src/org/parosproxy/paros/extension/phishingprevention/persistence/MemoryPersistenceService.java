@@ -8,6 +8,7 @@ import java.util.*;
 public class MemoryPersistenceService implements PersistenceService {
 
     List<StoredCredentials> store = new ArrayList<>();
+    PasswordHashingService hashingService = new SimpleHashingService();
 
     @Override
     public StoredCredentials get(String host, String username) {
@@ -30,7 +31,9 @@ public class MemoryPersistenceService implements PersistenceService {
         if (stored != null) {
             store.remove(stored);
         }
-        store.add(new StoredCredentials(credentials, whitelistHost, ignoreHygiene));
+        StoredCredentials newRecord = new StoredCredentials(credentials, whitelistHost, ignoreHygiene);
+        newRecord.hashPassword(hashingService);
+        store.add(newRecord);
     }
 
     @Override
@@ -39,5 +42,10 @@ public class MemoryPersistenceService implements PersistenceService {
         if (stored != null) {
             store.remove(stored);
         }
+    }
+
+    @Override
+    public PasswordHashingService getPasswordHashingService() {
+        return this.hashingService;
     }
 }

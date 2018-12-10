@@ -30,4 +30,8 @@ public class StoredCredentials extends Credentials {
     public void setHygieneWhitelisted(boolean hygieneWhitelisted) {
         isHygieneWhitelisted = hygieneWhitelisted;
     }
+
+    public void hashPassword(PasswordHashingService hashingService) {
+        setPassword(hashingService.hash(getPassword()));
+    }
 }

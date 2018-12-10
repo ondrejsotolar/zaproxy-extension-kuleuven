@@ -1,5 +1,6 @@
 package org.parosproxy.paros.extension.phishingprevention;
 
+import org.parosproxy.paros.extension.phishingprevention.persistence.PasswordHashingService;
 import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCredentials;
 
 public interface PersistenceService {
@@ -9,4 +10,6 @@ public interface PersistenceService {
     void saveOrUpdate(Credentials credentials, boolean whitelistHost, boolean ignoreHygiene);
 
     void remove(String host, String username);
+
+    PasswordHashingService getPasswordHashingService();
 }

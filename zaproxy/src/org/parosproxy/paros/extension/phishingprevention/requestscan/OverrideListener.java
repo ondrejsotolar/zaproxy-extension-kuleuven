@@ -55,9 +55,8 @@ public class OverrideListener implements OverrideMessageProxyListener {
         }
 
         if (isControlRequest(msg.getRequestBody().toString())) {
-            if (isControlRequestHandled(msg))  {
+            if (isControlRequestHandled(msg))
                 return false;
-            }
         }
 
         Credentials requestCredentials = credentialScannerService.getCredentialsInRequest(msg);
@@ -65,22 +64,26 @@ public class OverrideListener implements OverrideMessageProxyListener {
             return false;
         }
 
-        StoredCredentials storedCredentials = persistenceService.get(requestCredentials.getHost(), requestCredentials.getUsername());
+        StoredCredentials storedCredentials = persistenceService.get(
+                requestCredentials.getHost(),
+                requestCredentials.getUsername()
+        );
         if (isUnhandledCredentials(storedCredentials)) {
             if (isUnhandledCredentialsHandled(requestCredentials, storedCredentials, msg))
                 return true;
         }
 
-        if (storedCredentials.isHostWhitelisted()
-                && (storedCredentials.isHygieneWhitelisted() || !hygieneON)) {
+        if (isCorrectStoredCredentials(storedCredentials)) {
+            handlePasswordUpdate(requestCredentials, storedCredentials);
             return false;
         }
         else {
             throw new IllegalStateException(
-                    "ExtensionPhishingPrevention: false value in store for host: "
-                            + storedCredentials.getHost());
+                    "ExtensionPhishingPrevention: illegal value in store for: " + storedCredentials.getHost());
         }
     }
+
+
 
 
     @Override
@@ -105,10 +108,35 @@ public class OverrideListener implements OverrideMessageProxyListener {
         return this.requestCache;
     }
 
+    private boolean isControlRequest(String body) {
+        return body.contains(IS_CONTROL_REQUEST_KEYWORD);
+    }
+
+    private boolean isPlainRequest(Credentials requestCredentials) {
+        return requestCredentials == null;
+    }
+
     private boolean isUnhandledCredentials(StoredCredentials storedCredentials) {
         return storedCredentials == null
                 || !storedCredentials.isHostWhitelisted()
                 || (!storedCredentials.isHygieneWhitelisted() && hygieneON);
+    }
+
+    private boolean isCorrectStoredCredentials(StoredCredentials storedCredentials) {
+     return storedCredentials.isHostWhitelisted()
+             && (storedCredentials.isHygieneWhitelisted() || !hygieneON);
+    }
+
+    private void handlePasswordUpdate(Credentials requestCredentials, StoredCredentials storedCredentials) {
+        String newPassHash = persistenceService
+                .getPasswordHashingService().hash(requestCredentials.getPassword());
+
+        if (!newPassHash.equals(storedCredentials.getPassword())) {
+            persistenceService.saveOrUpdate(
+                    requestCredentials,
+                    storedCredentials.isHostWhitelisted(),
+                    storedCredentials.isHygieneWhitelisted());
+        }
     }
 
     private boolean isUnhandledCredentialsHandled(Credentials requestCredentials, StoredCredentials storedCredentials, HttpMessage msg) {
@@ -128,10 +156,6 @@ public class OverrideListener implements OverrideMessageProxyListener {
 
         log.info("ExtensionPhishingPrevention caught a request with credentials.");
         return true;
-    }
-
-    private boolean isPlainRequest(Credentials requestCredentials) {
-        return requestCredentials == null;
     }
 
     private boolean isControlRequestHandled(HttpMessage msg) {
@@ -164,9 +188,4 @@ public class OverrideListener implements OverrideMessageProxyListener {
         }
         return false;
     }
-
-    private boolean isControlRequest(String body) {
-        return body.contains(IS_CONTROL_REQUEST_KEYWORD);
-    }
-
 }
