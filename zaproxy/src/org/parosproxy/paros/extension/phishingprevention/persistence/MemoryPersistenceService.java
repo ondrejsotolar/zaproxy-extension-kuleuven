@@ -9,6 +9,12 @@ public class MemoryPersistenceService implements PersistenceService {
 
     List<StoredCredentials> store = new ArrayList<>();
     PasswordHashingService hashingService = new SimpleHashingService();
+    FilePersistenceService fps;
+
+    public MemoryPersistenceService(){
+        fps = new FilePersistenceService("filetest.csv");
+        store = fps.readFIle();
+    }
 
     @Override
     public StoredCredentials get(String host, String username) {
@@ -34,7 +40,7 @@ public class MemoryPersistenceService implements PersistenceService {
         StoredCredentials newRecord = new StoredCredentials(credentials, whitelistHost, ignoreHygiene);
         newRecord.hashPassword(hashingService);
         store.add(newRecord);
-        // we wanna add the new cred.. call Filepersistance.savetofile with list of storedcreds
+        fps.saveToFile(store);
     }
 
     @Override

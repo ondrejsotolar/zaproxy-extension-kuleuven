@@ -7,51 +7,41 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilePersistenceService extends MemoryPersistenceService {
+public class FilePersistenceService {
 
     private String name;
     private BufferedReader bufferedReader = null;
     private String line = "";
     private String cvsSplitBy = ",";
 
-    public String getName(){
-        return name;
-    }
-
-    public void setName(String name){
+    public FilePersistenceService(String name){
         this.name = name;
+        CreateFile(name);
     }
-
-    /*public FilePersistenceService(){
-
-        CreateFile();
-    }
-
 
     public void CreateFile(String name) {
 
         try {
             File file = new File ("src"+File.separator+"org"+File.separator+"parosproxy"+File.separator+"paros"+File.separator+"extension"+File.separator+"phishingprevention"+File.separator+"persistence"+File.separator+name);
+
             FileWriter writer = new FileWriter(file, true);
 
-            writer.append("aditya");
+            /*writer.append("aditya");
             writer.append(",");
             writer.append("aditya");
             writer.append(",");
             writer.append("aditya");
             writer.append(",");
             writer.append("aditya");
-            writer.append("\n");
+            writer.append("\n");*/
 
             writer.flush();
-
             writer.close();
 
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    */
 
     public List<StoredCredentials> readFIle() {
         List<StoredCredentials> storedList = new ArrayList<>();
@@ -60,7 +50,7 @@ public class FilePersistenceService extends MemoryPersistenceService {
             bufferedReader = new BufferedReader(new FileReader(name));
             while ((line = bufferedReader.readLine()) != null) {
                 String[] gr = line.split(cvsSplitBy);
-                System.out.println("host: " + gr[0] + " user: " + gr[1] + " pass: " + gr[2] + " isAllowed: " + gr[3]);
+                //System.out.println("host: " + gr[0] + " user: " + gr[1] + " pass: " + gr[2] + " isAllowed: " + gr[3]);
                 Credentials creds = new Credentials(gr[0],gr[1],gr[2]);
                 Boolean whitelisthost = Boolean.valueOf(gr[3]);
                 Boolean whitelisthygiene = Boolean.valueOf(gr[4]);
@@ -74,38 +64,58 @@ public class FilePersistenceService extends MemoryPersistenceService {
         return storedList;
     }
 
-    public void saveToFile(Credentials credentials, Boolean allowed) {
+    public void saveToFile(List<StoredCredentials> list) {
 
         // char[] pass1 ;
         // pass1 = new char[]{'P', 'a', 's', 's', 'w', 'o', 'r','d'};
-        if(allowed) {
-            String password = credentials.getPassword();
-            char p = password.charAt(0);
-            char[] pass = password.toCharArray();
+
+        deleteFile();
+        try {
+            File file = new File("src" + File.separator + "org" + File.separator + "parosproxy" + File.separator + "paros" + File.separator + "extension" + File.separator + "phishingprevention" + File.separator + "persistence" + File.separator + name);
+            FileWriter writer = new FileWriter(file, true);
 
 
-            byte[] newpass =  hashedPasswords.hash(pass,hashedPasswords.getNextSalt());
-            // System.out.println(newpass);
+        for (StoredCredentials storedCreds : list) {
 
-            try {
-                File file = new File ("src"+File.separator+"org"+File.separator+"parosproxy"+File.separator+"paros"+File.separator+"extension"+File.separator+"phishingprevention"+File.separator+"persistence"+File.separator+name);
-                FileWriter writer = new FileWriter(file, true);
+            Boolean allowed = storedCreds.isHostWhitelisted();
+            if (allowed) {
+                String password = storedCreds.getPassword();
+                char p = password.charAt(0);
+                char[] pass = password.toCharArray();
 
-                writer.append(credentials.getHost());
-                writer.append(",");
-                writer.append(credentials.getUsername());
-                writer.append(",");
-                writer.append(new String(newpass));
-                writer.append(",");
-                writer.append(allowed.toString());
-                writer.append("\n");
 
-                writer.flush();
-                writer.close();
+                byte[] newpass = hashedPasswords.hash(pass, hashedPasswords.getNextSalt());
+                // System.out.println(newpass);
 
-            } catch (Exception e) {
-                e.printStackTrace();
+                    writer.append(storedCreds.getHost());
+                    writer.append(",");
+                    writer.append(storedCreds.getUsername());
+                    writer.append(",");
+                    writer.append(new String(newpass));
+                    writer.append(",");
+                    writer.append(allowed.toString());
+                    writer.append("\n");
+
+                    writer.flush();
+                    writer.close();
+
+                }
             }
+
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void deleteFile(){
+        try {
+            File file = new File("src" + File.separator + "org" + File.separator + "parosproxy" + File.separator + "paros" + File.separator + "extension" + File.separator + "phishingprevention" + File.separator + "persistence" + File.separator + name);
+            if(file.exists())
+                file.delete();
+        }
+        catch (Exception e){
+            e.printStackTrace();
         }
     }
 
