@@ -3,7 +3,7 @@ package org.parosproxy.paros.extension.phishingprevention.requestscan;
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.extension.phishingprevention.*;
-import org.parosproxy.paros.extension.phishingprevention.html.ResponseHandler;
+import org.parosproxy.paros.extension.phishingprevention.html.ResponseMessageHandler;
 import org.parosproxy.paros.extension.phishingprevention.persistence.MemoryPersistenceService;
 import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCredentials;
 import org.parosproxy.paros.network.HttpMessage;
@@ -21,7 +21,7 @@ public class OverrideListener implements OverrideMessageProxyListener {
     private IPasswordHygieneService passwordHygieneService;
     private PersistenceService persistenceService;
     private RequestCache requestCache;
-    private ResponseHandler responseHandler;
+    private ResponseMessageHandler responseMessageHandler;
 
     private boolean ON = false;
     private boolean hygieneON = false;
@@ -33,7 +33,7 @@ public class OverrideListener implements OverrideMessageProxyListener {
         this.passwordHygieneService = new PasswordHygieneService();
         this.persistenceService = new MemoryPersistenceService();
         this.requestCache = new RequestCache();
-        this.responseHandler = new ResponseHandler();
+        this.responseMessageHandler = new ResponseMessageHandler();
     }
 
     public OverrideListener(
@@ -44,7 +44,7 @@ public class OverrideListener implements OverrideMessageProxyListener {
         this.passwordHygieneService = passwordHygieneService;
         this.persistenceService = persistenceService;
         this.requestCache = new RequestCache();
-        this.responseHandler = new ResponseHandler();
+        this.responseMessageHandler = new ResponseMessageHandler();
     }
 
     // TODO: move handlers to separate classes
@@ -74,17 +74,14 @@ public class OverrideListener implements OverrideMessageProxyListener {
         }
 
         if (isCorrectStoredCredentials(storedCredentials)) {
-            handlePasswordUpdate(requestCredentials, storedCredentials);
+            persistenceService.updatePassword(requestCredentials, storedCredentials);
             return false;
         }
         else {
             throw new IllegalStateException(
-                    "ExtensionPhishingPrevention: illegal value in store for: " + storedCredentials.getHost());
+                "ExtensionPhishingPrevention: illegal value in store for: " + storedCredentials.getHost());
         }
     }
-
-
-
 
     @Override
     public boolean onHttpResponseReceived(HttpMessage msg) {
@@ -127,18 +124,6 @@ public class OverrideListener implements OverrideMessageProxyListener {
              && (storedCredentials.isHygieneWhitelisted() || !hygieneON);
     }
 
-    private void handlePasswordUpdate(Credentials requestCredentials, StoredCredentials storedCredentials) {
-        boolean isSame = persistenceService.getPasswordHashingService()
-                .check(requestCredentials.getPassword(), storedCredentials.getPassword());
-
-        if (!isSame) {
-            persistenceService.saveOrUpdate(
-                    requestCredentials,
-                    storedCredentials.isHostWhitelisted(),
-                    storedCredentials.isHygieneWhitelisted());
-        }
-    }
-
     private boolean isUnhandledCredentialsHandled(Credentials requestCredentials, StoredCredentials storedCredentials, HttpMessage msg) {
         if (storedCredentials == null) {
             persistenceService.saveOrUpdate(requestCredentials, false, false);
@@ -148,7 +133,7 @@ public class OverrideListener implements OverrideMessageProxyListener {
         if (hygieneON) {
             hygieneResult = passwordHygieneService.checkPasswordHygiene(requestCredentials);
         }
-        responseHandler.setResponseBodyContent(
+        responseMessageHandler.setResponseBodyContent(
                 msg,
                 requestCache.putRequestInCache(msg),
                 requestCredentials.getHost(),
@@ -161,7 +146,7 @@ public class OverrideListener implements OverrideMessageProxyListener {
     private boolean isControlRequestHandled(HttpMessage msg) {
         String body = msg.getRequestBody().toString();
 
-        if (body.contains(CREDENTIALS_ALLOWED_KEYWORD)) { // save & return the original request
+        if (body.contains(CREDENTIALS_ALLOWED_KEYWORD)) {
             HttpMessage originalRequest = requestCache.getRequestById(
                     credentialScannerService.getParamIntFromBody(body, REQUEST_ID));
             msg.setRequestHeader(originalRequest.getRequestHeader());
@@ -174,7 +159,7 @@ public class OverrideListener implements OverrideMessageProxyListener {
             return true;
         }
         else if (body.contains(CANCEL_KEYWORD)) {
-            responseHandler.setResponseBodyForCancelPage(msg);
+            responseMessageHandler.setResponseBodyForCancelPage(msg);
 
             HttpMessage originalRequest = requestCache.getRequestById(
                     credentialScannerService.getParamIntFromBody(body, REQUEST_ID));

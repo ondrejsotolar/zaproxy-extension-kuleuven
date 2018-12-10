@@ -44,8 +44,21 @@ public class MemoryPersistenceService implements PersistenceService {
         }
     }
 
+//    @Override
+//    public PasswordHashingService getPasswordHashingService() {
+//        return this.hashingService;
+//    }
+
     @Override
-    public PasswordHashingService getPasswordHashingService() {
-        return this.hashingService;
+    public void updatePassword(Credentials requestCredentials, StoredCredentials storedCredentials) {
+        boolean isSame = hashingService
+                .check(requestCredentials.getPassword(), storedCredentials.getPassword());
+
+        if (!isSame) {
+            saveOrUpdate(
+                    requestCredentials,
+                    storedCredentials.isHostWhitelisted(),
+                    storedCredentials.isHygieneWhitelisted());
+        }
     }
 }

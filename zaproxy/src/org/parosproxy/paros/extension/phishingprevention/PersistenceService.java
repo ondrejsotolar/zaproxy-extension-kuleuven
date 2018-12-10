@@ -11,5 +11,5 @@ public interface PersistenceService {
 
     void remove(String host, String username);
 
-    PasswordHashingService getPasswordHashingService();
+    void updatePassword(Credentials requestCredentials, StoredCredentials storedCredentials);
 }

@@ -4,7 +4,7 @@ import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneResult;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 
-public class ResponseHandler {
+public class ResponseMessageHandler {
     public void setResponseBodyContent(HttpMessage msg, int requestId, String host,
                                        PasswordHygieneResult hygieneResult) {
         WarningPage warningPage = new WarningPage();
