@@ -34,6 +34,7 @@ public class MemoryPersistenceService implements PersistenceService {
         StoredCredentials newRecord = new StoredCredentials(credentials, whitelistHost, ignoreHygiene);
         newRecord.hashPassword(hashingService);
         store.add(newRecord);
+        // we wanna add the new cred.. call Filepersistance.savetofile with list of storedcreds
     }
 
     @Override

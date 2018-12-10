@@ -4,6 +4,8 @@ import org.hsqldb.util.CSVWriter;
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class FilePersistenceService extends MemoryPersistenceService {
 
@@ -51,17 +53,25 @@ public class FilePersistenceService extends MemoryPersistenceService {
     }
     */
 
-    public void readFIle() {
+    public List<StoredCredentials> readFIle() {
+        List<StoredCredentials> storedList = new ArrayList<>();
+
         try {
             bufferedReader = new BufferedReader(new FileReader(name));
             while ((line = bufferedReader.readLine()) != null) {
                 String[] gr = line.split(cvsSplitBy);
                 System.out.println("host: " + gr[0] + " user: " + gr[1] + " pass: " + gr[2] + " isAllowed: " + gr[3]);
+                Credentials creds = new Credentials(gr[0],gr[1],gr[2]);
+                Boolean whitelisthost = Boolean.valueOf(gr[3]);
+                Boolean whitelisthygiene = Boolean.valueOf(gr[4]);
+                StoredCredentials storeCred = new StoredCredentials(creds, whitelisthost, whitelisthygiene);
+                storedList.add(storeCred);
             }
             bufferedReader.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return storedList;
     }
 
     public void saveToFile(Credentials credentials, Boolean allowed) {
