@@ -3,6 +3,7 @@ package org.parosproxy.paros.extensions.phishingprevention;
 import org.apache.commons.httpclient.URIException;
 import org.junit.Assert;
 import org.junit.Test;
+import org.parosproxy.paros.extension.phishingprevention.CredentialScanerService;
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
 import org.parosproxy.paros.extension.phishingprevention.RequestCredentialScannerService;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
@@ -136,5 +137,28 @@ public class RequestCredentialScannerServiceTest {
         boolean isPost = service.isPost(message);
         Assert.assertTrue(isPost);
         Assert.assertNull(actual);
+    }
+
+    @Test
+    public void stringParamTest() {
+        CredentialScanerService service = new RequestCredentialScannerService();
+        String body1 = "";
+        String body2 = "username=tom";
+        String body3 = "id=1";
+        String body4 = "username=tom&id=1";
+        String body5 = "username=tom&id=1&pass=123";
+
+        Assert.assertNull(service.getParamStringFromBody(body1, "any"));
+        Assert.assertTrue(service.getParamIntFromBody(body1, "any") == -1);
+
+        Assert.assertEquals("tom", service.getParamStringFromBody(body2, "username"));
+
+        Assert.assertEquals(1, service.getParamIntFromBody(body3, "id"));
+
+        Assert.assertEquals("tom", service.getParamStringFromBody(body4, "username"));
+        Assert.assertEquals(1, service.getParamIntFromBody(body4, "id"));
+
+        Assert.assertEquals("tom", service.getParamStringFromBody(body5, "username"));
+        Assert.assertEquals(1, service.getParamIntFromBody(body5, "id"));
     }
 }

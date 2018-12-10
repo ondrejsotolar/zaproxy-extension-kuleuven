@@ -7,8 +7,8 @@ import java.util.*;
 
 public class MemoryPersistenceService implements PersistenceService {
 
-    List<StoredCredentials> store = new ArrayList<>();
-    PasswordHashingService hashingService = new SimpleHashingService();
+    private List<StoredCredentials> store = new ArrayList<>();
+    private PasswordHashingService hashingService = new SimpleHashingService();
 
     @Override
     public StoredCredentials get(String host, String username) {
@@ -43,11 +43,6 @@ public class MemoryPersistenceService implements PersistenceService {
             store.remove(stored);
         }
     }
-
-//    @Override
-//    public PasswordHashingService getPasswordHashingService() {
-//        return this.hashingService;
-//    }
 
     @Override
     public void updatePassword(Credentials requestCredentials, StoredCredentials storedCredentials) {

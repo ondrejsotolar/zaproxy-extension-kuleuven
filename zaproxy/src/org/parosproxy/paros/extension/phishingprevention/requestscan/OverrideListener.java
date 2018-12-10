@@ -166,8 +166,7 @@ public class OverrideListener implements OverrideMessageProxyListener {
 
             Credentials requestCredentials = credentialScannerService.getCredentialsInRequest(originalRequest);
             persistenceService.remove(requestCredentials.getHost(), requestCredentials.getUsername());
-
-            // TODO: remove the request from cache
+            requestCache.remove(originalRequest);
 
             return true;
         }
