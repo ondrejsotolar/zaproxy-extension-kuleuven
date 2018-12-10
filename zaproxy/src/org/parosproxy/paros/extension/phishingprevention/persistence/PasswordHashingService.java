@@ -1,5 +1,6 @@
 package org.parosproxy.paros.extension.phishingprevention.persistence;
 
 public interface PasswordHashingService {
-    String hash(String password);
+    String getHash(String password);
+    boolean check(String password, String stored);
 }

@@ -128,10 +128,10 @@ public class OverrideListener implements OverrideMessageProxyListener {
     }
 
     private void handlePasswordUpdate(Credentials requestCredentials, StoredCredentials storedCredentials) {
-        String newPassHash = persistenceService
-                .getPasswordHashingService().hash(requestCredentials.getPassword());
+        boolean isSame = persistenceService.getPasswordHashingService()
+                .check(requestCredentials.getPassword(), storedCredentials.getPassword());
 
-        if (!newPassHash.equals(storedCredentials.getPassword())) {
+        if (!isSame) {
             persistenceService.saveOrUpdate(
                     requestCredentials,
                     storedCredentials.isHostWhitelisted(),

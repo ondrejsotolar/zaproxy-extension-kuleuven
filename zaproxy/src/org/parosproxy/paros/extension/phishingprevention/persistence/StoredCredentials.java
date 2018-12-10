@@ -32,6 +32,6 @@ public class StoredCredentials extends Credentials {
     }
 
     public void hashPassword(PasswordHashingService hashingService) {
-        setPassword(hashingService.hash(getPassword()));
+        setPassword(hashingService.getHash(getPassword()));
     }
 }
