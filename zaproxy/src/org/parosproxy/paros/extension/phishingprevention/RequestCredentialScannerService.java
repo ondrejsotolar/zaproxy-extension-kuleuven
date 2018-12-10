@@ -3,7 +3,6 @@ package org.parosproxy.paros.extension.phishingprevention;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.GetRequestScanner;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.PostRequestScanner;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.RequestParamsScanner;
-import org.parosproxy.paros.extension.phishingprevention.requestscan.StringParamScanner;
 import org.parosproxy.paros.network.HttpMessage;
 
 import java.util.*;
@@ -78,6 +77,7 @@ public class RequestCredentialScannerService implements CredentialScanerService 
         return (Arrays.stream(this.usernameKeywords)).anyMatch(x -> s.contains(x));
     }
 
+    @Override
     public int getParamIntFromBody(String body, String paramName) {
         String param = getParamStringFromBody(body, paramName);
         if (param == null) {
@@ -87,6 +87,17 @@ public class RequestCredentialScannerService implements CredentialScanerService 
         return requestId;
     }
 
+    @Override
+    public boolean getParamBoolFromBody(String body, String paramName) {
+        String param = getParamStringFromBody(body, paramName);
+        if (param == null) {
+            return false;
+        }
+        boolean result = Boolean.parseBoolean(param.substring(param.indexOf("=")+1));
+        return result;
+    }
+
+    @Override
     public String getParamStringFromBody(String body, String paramName) {
         int beginIndex = body.indexOf(paramName);
         if (beginIndex < 0) {

@@ -4,11 +4,9 @@ import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCrede
 
 public interface PersistenceService {
 
-    StoredCredentials get(String host);
+    StoredCredentials get(String host, String username);
 
-    void saveOrUpdate(Credentials credentials, boolean allow);
+    void saveOrUpdate(Credentials credentials, boolean whitelistHost, boolean ignoreHygiene);
 
-    void setHostWhitelisted(String host, boolean allow);
-
-    void remove(String host);
+    void remove(String host, String username);
 }

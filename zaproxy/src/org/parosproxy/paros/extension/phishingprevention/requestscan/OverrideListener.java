@@ -10,7 +10,9 @@ import org.parosproxy.paros.network.HttpMessage;
 
 public class OverrideListener implements OverrideMessageProxyListener {
 
+    public final String IS_CONTROL_REQUEST_KEYWORD = "phishing_prevention_cr=true";
     public final String CREDENTIALS_ALLOWED_KEYWORD = "save=true";
+    public final String HYGIENE_IGNORED_KEYWORD = "ignore_hygiene=true";
     public final String CANCEL_KEYWORD = "save=false";
     public final String REQUEST_ID = "request_id";
     public final String HOST_KEYWORD = "host_address";
@@ -45,49 +47,32 @@ public class OverrideListener implements OverrideMessageProxyListener {
         this.responseHandler = new ResponseHandler();
     }
 
+    // TODO: move handlers to separate classes
     @Override
     public boolean onHttpRequestSend(HttpMessage msg) {
         if (!ON) {
             return false;
         }
 
-        String body = msg.getRequestBody().toString();
-        if (body.contains(CREDENTIALS_ALLOWED_KEYWORD)) { // save & return the original request
-            persistenceService.setHostWhitelisted(
-                    credentialScannerService.getParamStringFromBody(body, HOST_KEYWORD), true);
-
-            HttpMessage originalRequest = requestCache.getRequestById(
-                    credentialScannerService.getParamIntFromBody(body, REQUEST_ID));
-            msg.setRequestHeader(originalRequest.getRequestHeader());
-            msg.setRequestBody(originalRequest.getRequestBody());
-            return false;
-        }
-        else if (body.contains(CANCEL_KEYWORD)) {
-            responseHandler.setResponseBodyForCancelPage(msg);
-            persistenceService.remove(
-                    credentialScannerService.getParamStringFromBody(body, HOST_KEYWORD));
-            return false;
+        if (isControlRequest(msg.getRequestBody().toString())) {
+            if (isControlRequestHandled(msg))  {
+                return false;
+            }
         }
 
         Credentials requestCredentials = credentialScannerService.getCredentialsInRequest(msg);
-        if (requestCredentials == null) {
+        if (isPlainRequest(requestCredentials)) {
             return false;
         }
-        StoredCredentials storedCredentials = persistenceService.get(requestCredentials.getHost());
-        if (storedCredentials == null) { // new credentials -> return warning page
-            persistenceService.saveOrUpdate(requestCredentials, false);
 
-            PasswordHygieneResult hygieneResult = null;
-            if (hygieneON) {
-                hygieneResult = passwordHygieneService.checkPasswordHygiene(requestCredentials);
-            }
-            responseHandler.setResponseBodyContent(msg, requestCache.putRequestInCache(msg),
-                    requestCredentials.getHost(), hygieneResult);
-
-            log.info("ExtensionPhishingPrevention caught a request with credentials.");
-            return true;
+        StoredCredentials storedCredentials = persistenceService.get(requestCredentials.getHost(), requestCredentials.getUsername());
+        if (isUnhandledCredentials(storedCredentials)) {
+            if (isUnhandledCredentialsHandled(requestCredentials, storedCredentials, msg))
+                return true;
         }
-        if (storedCredentials.isHostWhitelisted()) { // Allow only one credentials per host
+
+        if (storedCredentials.isHostWhitelisted()
+                && (storedCredentials.isHygieneWhitelisted() || !hygieneON)) {
             return false;
         }
         else {
@@ -96,6 +81,7 @@ public class OverrideListener implements OverrideMessageProxyListener {
                             + storedCredentials.getHost());
         }
     }
+
 
     @Override
     public boolean onHttpResponseReceived(HttpMessage msg) {
@@ -118,4 +104,69 @@ public class OverrideListener implements OverrideMessageProxyListener {
     public RequestCache getRequestCache() {
         return this.requestCache;
     }
+
+    private boolean isUnhandledCredentials(StoredCredentials storedCredentials) {
+        return storedCredentials == null
+                || !storedCredentials.isHostWhitelisted()
+                || (!storedCredentials.isHygieneWhitelisted() && hygieneON);
+    }
+
+    private boolean isUnhandledCredentialsHandled(Credentials requestCredentials, StoredCredentials storedCredentials, HttpMessage msg) {
+        if (storedCredentials == null) {
+            persistenceService.saveOrUpdate(requestCredentials, false, false);
+        }
+
+        PasswordHygieneResult hygieneResult = null;
+        if (hygieneON) {
+            hygieneResult = passwordHygieneService.checkPasswordHygiene(requestCredentials);
+        }
+        responseHandler.setResponseBodyContent(
+                msg,
+                requestCache.putRequestInCache(msg),
+                requestCredentials.getHost(),
+                hygieneResult);
+
+        log.info("ExtensionPhishingPrevention caught a request with credentials.");
+        return true;
+    }
+
+    private boolean isPlainRequest(Credentials requestCredentials) {
+        return requestCredentials == null;
+    }
+
+    private boolean isControlRequestHandled(HttpMessage msg) {
+        String body = msg.getRequestBody().toString();
+
+        if (body.contains(CREDENTIALS_ALLOWED_KEYWORD)) { // save & return the original request
+            HttpMessage originalRequest = requestCache.getRequestById(
+                    credentialScannerService.getParamIntFromBody(body, REQUEST_ID));
+            msg.setRequestHeader(originalRequest.getRequestHeader());
+            msg.setRequestBody(originalRequest.getRequestBody());
+
+            Credentials requestCredentials = credentialScannerService.getCredentialsInRequest(originalRequest);
+            boolean hygiene = credentialScannerService.getParamBoolFromBody(body, HYGIENE_IGNORED_KEYWORD);
+            persistenceService.saveOrUpdate(requestCredentials, true, hygiene);
+
+            return true;
+        }
+        else if (body.contains(CANCEL_KEYWORD)) {
+            responseHandler.setResponseBodyForCancelPage(msg);
+
+            HttpMessage originalRequest = requestCache.getRequestById(
+                    credentialScannerService.getParamIntFromBody(body, REQUEST_ID));
+
+            Credentials requestCredentials = credentialScannerService.getCredentialsInRequest(originalRequest);
+            persistenceService.remove(requestCredentials.getHost(), requestCredentials.getUsername());
+
+            // TODO: remove the request from cache
+
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isControlRequest(String body) {
+        return body.contains(IS_CONTROL_REQUEST_KEYWORD);
+    }
+
 }

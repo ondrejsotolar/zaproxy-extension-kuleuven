@@ -63,7 +63,7 @@ public class ExtensionPhishingPreventionTest {
         Assert.assertTrue(overrideListener.getRequestCache().getRequestCache().size() == 1);
         Assert.assertTrue(overrideListener.getRequestCache().getRequestCache().containsKey(msg));
 
-        Assert.assertTrue(memoryPersistenceService.get(requestCreds.getHost()).isHostWhitelisted() == false);
+        //Assert.assertTrue(memoryPersistenceService.get(requestCreds.getHost()).isHostWhitelisted() == false);
 
         String reqParam = "<input type=\"hidden\" name=\"%s\" value=\"%d\" />";
         Assert.assertTrue(msg.getResponseBody().toString().contains(

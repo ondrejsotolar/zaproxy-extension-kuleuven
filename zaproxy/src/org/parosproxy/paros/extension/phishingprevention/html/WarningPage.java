@@ -20,19 +20,24 @@ public class WarningPage {
             "%s%s%s</body></html>";
 
     private String proceedButtonBase = "<form action=\"http://%s\" method=\"POST\">" +
+            "%s" +
             "<button type=\"submit\">Proceed to %s</button>" +
+            "<input type=\"hidden\" name=\"phishing_prevention_cr\" value=\"true\" />" +
             "<input type=\"hidden\" name=\"save\" value=\"true\" />" +
             "<input type=\"hidden\" name=\"request_id\" value=\"%d\" />" +
             "<input type=\"hidden\" name=\"host_address\" value=\"%s\" />" +
             "</form><br>";
     private String cancelButtonBase = "<form action=\"http://%s\" method=\"POST\">" +
             "<button type=\"submit\">Cancel</button>" +
+            "<input type=\"hidden\" name=\"phishing_prevention_cr\" value=\"true\" />" +
             "<input type=\"hidden\" name=\"save\" value=\"false\" />" +
             "<input type=\"hidden\" name=\"request_id\" value=\"%d\" />" +
             "<input type=\"hidden\" name=\"host_address\" value=\"%s\" />" +
             "</form><br>";
 
     private String hygieneListBase = "<p>Password hygiene fail reasons:<br/><ul>%s</ul></p>";
+    private String hygieneCheckbox = "<input type=\"checkbox\" name=\"ignore_hygiene\" value=\"true\">" +
+            "Ignore hygiene warnings<br/>";
 
 
     public String getHeader() {
@@ -48,7 +53,7 @@ public class WarningPage {
     public String getBody(int requestId, String host, PasswordHygieneResult hygieneResult) {
         return String.format(bodyWithHygiene,
                 getHygieneWarningMessage(hygieneResult),
-                getProceedButton(host, requestId, host),
+                getProceedButtonWithHygiene(host, requestId, host),
                 getCancelButton("localhost", requestId, host));
     }
 
@@ -64,7 +69,11 @@ public class WarningPage {
     }
 
     public String getProceedButton(String candidate, int requestId, String host) {
-        return String.format(proceedButtonBase, candidate, candidate, requestId, host);
+        return String.format(proceedButtonBase, candidate, "", candidate, requestId, host);
+    }
+
+    public String getProceedButtonWithHygiene(String candidate, int requestId, String host) {
+        return String.format(proceedButtonBase, candidate, hygieneCheckbox, candidate, requestId, host);
     }
 
     public String getCancelButton(String candidate, int requestId, String host) {
