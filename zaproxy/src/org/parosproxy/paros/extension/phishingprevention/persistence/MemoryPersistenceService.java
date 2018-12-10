@@ -1,28 +1,14 @@
 package org.parosproxy.paros.extension.phishingprevention.persistence;
+
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
 import org.parosproxy.paros.extension.phishingprevention.PersistenceService;
 
-<<<<<<< HEAD
-import java.io.*;
-import java.util.HashMap;
-import java.util.Map;
-
-public class MemoryPersistenceService implements PersistenceService {
-
-   Map<String, StoredCredentials> store = new HashMap<>();
-
-    static BufferedReader bufferedReader = null;
-    static String line = "";
-    static String cvsSplitBy = ",";
-
-=======
 import java.util.*;
 
 public class MemoryPersistenceService implements PersistenceService {
 
     List<StoredCredentials> store = new ArrayList<>();
     PasswordHashingService hashingService = new SimpleHashingService();
->>>>>>> master
 
     @Override
     public StoredCredentials get(String host, String username) {
@@ -75,5 +61,4 @@ public class MemoryPersistenceService implements PersistenceService {
                     storedCredentials.isHygieneWhitelisted());
         }
     }
-
 }
