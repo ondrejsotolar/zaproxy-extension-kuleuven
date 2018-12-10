@@ -18,7 +18,7 @@ public class FilePersistenceServiceTest {
     public  void fileCreateTest(){
 
         FilePersistenceService fileTest = new FilePersistenceService();
-        Path path = Paths.get("output.csv");
+        File file = new File("src\\org\\parosproxy\\paros\\extension\\phishingprevention\\persistence\\output.csv");
         Assert.assertTrue(file.exists());
 
     }
