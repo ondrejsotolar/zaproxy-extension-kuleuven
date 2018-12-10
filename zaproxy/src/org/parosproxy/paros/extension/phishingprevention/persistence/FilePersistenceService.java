@@ -8,8 +8,11 @@ import java.io.*;
 public class FilePersistenceService extends MemoryPersistenceService {
 
     private String name;
+    private BufferedReader bufferedReader = null;
+    private String line = "";
+    private String cvsSplitBy = ",";
 
-    public void getName(){
+    public String getName(){
         return name;
     }
 
@@ -50,7 +53,6 @@ public class FilePersistenceService extends MemoryPersistenceService {
 
     public void readFIle() {
         try {
-
             bufferedReader = new BufferedReader(new FileReader(name));
             while ((line = bufferedReader.readLine()) != null) {
                 String[] gr = line.split(cvsSplitBy);
