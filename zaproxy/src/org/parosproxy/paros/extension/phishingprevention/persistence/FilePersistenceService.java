@@ -17,23 +17,14 @@ public class FilePersistenceService {
 
     public FilePersistenceService(String name){
         this.name = name;
-        CreateFile(name);
-        File file = new File ("src"+File.separator+"org"+File.separator+"parosproxy"+File.separator+"paros"+File.separator+"extension"+File.separator+"phishingprevention"+File.separator+"persistence"+File.separator+name);
+        CreateFile();
+        file = new File ("src"+File.separator+"org"+File.separator+"parosproxy"+File.separator+"paros"+File.separator+"extension"+File.separator+"phishingprevention"+File.separator+"persistence"+File.separator+name);
     }
 
-    public void CreateFile(String name) {
+    public void CreateFile() {
 
         try {
             FileWriter writer = new FileWriter(file, true);
-
-            /*writer.append("aditya");
-            writer.append(",");
-            writer.append("aditya");
-            writer.append(",");
-            writer.append("aditya");
-            writer.append(",");
-            writer.append("aditya");
-            writer.append("\n");*/
 
             writer.flush();
             writer.close();
@@ -65,38 +56,29 @@ public class FilePersistenceService {
     }
 
     public void saveToFile(List<StoredCredentials> list) {
-
-        // char[] pass1 ;
-        // pass1 = new char[]{'P', 'a', 's', 's', 'w', 'o', 'r','d'};
-
         deleteFile();
         try {
+            CreateFile();
             FileWriter writer = new FileWriter(file, true);
-            
+
         for (StoredCredentials storedCreds : list) {
 
-            Boolean allowed = storedCreds.isHostWhitelisted();
-            if (allowed) {
-                String password = storedCreds.getPassword();
-                char p = password.charAt(0);
-                char[] pass = password.toCharArray();
-
-
-                byte[] newpass = hashedPasswords.hash(pass, hashedPasswords.getNextSalt());
-                // System.out.println(newpass);
-
+            Boolean hostWhitelisted = storedCreds.isHostWhitelisted();
+            Boolean hygieneWhitelisted = storedCreds.isHygieneWhitelisted();
+            if (hostWhitelisted) {
                     writer.append(storedCreds.getHost());
                     writer.append(",");
                     writer.append(storedCreds.getUsername());
                     writer.append(",");
-                    writer.append(new String(newpass));
+                    writer.append(storedCreds.getPassword());
                     writer.append(",");
-                    writer.append(allowed.toString());
+                    writer.append(hostWhitelisted.toString());
+                    writer.append(",");
+                    writer.append(hygieneWhitelisted.toString());
                     writer.append("\n");
 
                     writer.flush();
                     writer.close();
-
                 }
             }
 
