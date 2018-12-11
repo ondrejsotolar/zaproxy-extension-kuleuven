@@ -21,7 +21,7 @@ public class FilePersistenceServiceTest {
         FilePersistenceService fileTest = new FilePersistenceService("dennis.csv");
         File file = new File("src\\org\\parosproxy\\paros\\extension\\phishingprevention\\persistence\\dennis.csv");
         Assert.assertTrue(file.exists());
-
+        fileTest.deleteFile();
     }
 
     @Test
@@ -62,6 +62,8 @@ public class FilePersistenceServiceTest {
             Assert.assertTrue(stca.isHostWhitelisted() == stcb.isHostWhitelisted());
             Assert.assertTrue(stca.isHygieneWhitelisted() == stcb.isHygieneWhitelisted());
         }
+
+        fileTest.deleteFile();
     }
 
 
