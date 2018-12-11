@@ -16,6 +16,11 @@ public class FilePersistenceService implements PersistenceService {
         store = fps.loadStoredCredentials();
     }
 
+    public FilePersistenceService(TextFileStorage fps){
+        this.fps = fps;
+        store = fps.loadStoredCredentials();
+    }
+
     @Override
     public StoredCredentials get(String host, String username) {
 
