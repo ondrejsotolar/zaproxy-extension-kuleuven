@@ -51,11 +51,6 @@ public class MemoryPersistenceService implements PersistenceService {
         }
     }
 
-//    @Override
-//    public PasswordHashingService getPasswordHashingService() {
-//        return this.hashingService;
-//    }
-
     @Override
     public void updatePassword(Credentials requestCredentials, StoredCredentials storedCredentials) {
         boolean isSame = hashingService

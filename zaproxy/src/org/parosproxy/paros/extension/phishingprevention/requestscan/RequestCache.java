@@ -30,6 +30,10 @@ public class RequestCache {
         return this.requestCounter++;
     }
 
+    public void remove(HttpMessage message) {
+        requestCache.remove(message);
+    }
+
     public ConcurrentHashMap<HttpMessage, Integer> getRequestCache() {
         return requestCache;
     }
