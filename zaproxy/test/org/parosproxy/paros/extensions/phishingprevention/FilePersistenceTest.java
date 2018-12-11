@@ -8,23 +8,18 @@ import org.junit.Test;
 
 import java.io.File;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
-
 public class MemoryPersistenceTest {
 
     @Test
     public void createFile (){
-        MemoryPersistenceService memTest = new MemoryPersistenceService();
+        FilePersistenceService memTest = new FilePersistenceService();
         File file = new File("src\\org\\parosproxy\\paros\\extension\\phishingprevention\\persistence\\storedCredentials.csv");
         Assert.assertTrue(file.exists());
     }
 
     @Test
     public void saveTest(){
-        MemoryPersistenceService memTest = new MemoryPersistenceService();
+        FilePersistenceService memTest = new FilePersistenceService();
         Credentials cred = new Credentials("host1", "usr1", "pass1");
         memTest.saveOrUpdate( cred, true, false);
         StoredCredentials storedCred = memTest.get("host1","usr1");
@@ -38,7 +33,7 @@ public class MemoryPersistenceTest {
 
     @Test
     public void updateTest() {
-        MemoryPersistenceService memTest = new MemoryPersistenceService();
+        FilePersistenceService memTest = new FilePersistenceService();
         PasswordHashingService hashingService = new SimpleHashingService();
         Credentials cred1 = new Credentials("host1", "usr1", "pass1");
         memTest.saveOrUpdate( cred1, true, false);
@@ -55,7 +50,7 @@ public class MemoryPersistenceTest {
 
     @Test
     public void removeTest() {
-        MemoryPersistenceService memTest = new MemoryPersistenceService();
+        FilePersistenceService memTest = new FilePersistenceService();
         Credentials cred1 = new Credentials("host1", "usr1", "pass1");
         memTest.saveOrUpdate( cred1, true, false);
 
