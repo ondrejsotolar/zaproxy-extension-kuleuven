@@ -1,103 +1,76 @@
 package org.parosproxy.paros.extension.phishingprevention.persistence;
 
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
+import org.parosproxy.paros.extension.phishingprevention.PersistenceService;
 
-import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
-public class FilePersistenceService {
+public class FilePersistenceService implements PersistenceService {
 
-    private String name;
-    private BufferedReader bufferedReader = null;
-    private String line = "";
-    private String cvsSplitBy = ",";
-    private File file;
+    List<StoredCredentials> store;
+    PasswordHashingService hashingService = new SimpleHashingService();
+    TextFileStorage fps;
 
-    public FilePersistenceService(String name){
-        this.name = name;
-        file = new File ("src"+File.separator+"org"+File.separator+"parosproxy"+File.separator+"paros"+File.separator+"extension"+File.separator+"phishingprevention"+File.separator+"persistence"+File.separator+name);
-        CreateFile();
+    public FilePersistenceService(){
+        fps = new TextFileStorage("storedCredentials.csv");
+        store = fps.loadStoredCredentials();
+    }
+
+    public FilePersistenceService(TextFileStorage fps){
+        this.fps = fps;
+        store = fps.loadStoredCredentials();
+    }
+
+    @Override
+    public StoredCredentials get(String host, String username) {
+
+        Optional<StoredCredentials> found = this.store
+                .stream()
+                .filter(sc -> host.equals(sc.getHost()) && username.equals(sc.getUsername()))
+                .findFirst();
+
+        StoredCredentials result = found.isPresent()
+                ? found.get()
+                : null;
+
+        return result;
+    }
+
+    @Override
+    public void saveOrUpdate(Credentials credentials, boolean whitelistHost, boolean ignoreHygiene) {
+        StoredCredentials stored = get(credentials.getHost(), credentials.getUsername());
+        if (stored != null) {
+            store.remove(stored);
         }
+        StoredCredentials newRecord = new StoredCredentials(credentials, whitelistHost, ignoreHygiene);
+        newRecord.hashPassword(hashingService);
+        store.add(newRecord);
+        fps.saveToFile(store);
+    }
 
-    public void CreateFile() {
-
-        try {
-            FileWriter writer = new FileWriter(file, true);
-
-            writer.flush();
-            writer.close();
-
-        } catch (Exception e) {
-            e.printStackTrace();
+    @Override
+    public void remove(String host, String username) {
+        StoredCredentials stored = get(host, username);
+        if (stored != null) {
+            store.remove(stored);
+            fps.saveToFile(store);
         }
     }
 
-    public List<StoredCredentials> readFIle() {
-        List<StoredCredentials> storedList = new ArrayList<>();
+    @Override
+    public void updatePassword(Credentials requestCredentials, StoredCredentials storedCredentials) {
+        boolean isSame = hashingService
+                .check(requestCredentials.getPassword(), storedCredentials.getPassword());
 
-        try {
-            bufferedReader = new BufferedReader(new FileReader(file));
-            while ((line = bufferedReader.readLine()) != null) {
-                String[] gr = line.split(cvsSplitBy);
-                //System.out.println("host: " + gr[0] + " user: " + gr[1] + " pass: " + gr[2] + " isAllowed: " + gr[3]);
-                Credentials creds = new Credentials(gr[0],gr[1],gr[2]);
-                Boolean whitelisthost = Boolean.valueOf(gr[3]);
-                Boolean whitelisthygiene = Boolean.valueOf(gr[4]);
-                StoredCredentials storeCred = new StoredCredentials(creds, whitelisthost, whitelisthygiene);
-                storedList.add(storeCred);
-            }
-            bufferedReader.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return storedList;
-    }
-
-    public void saveToFile(List<StoredCredentials> list) {
-        deleteFile();
-        try {
-            CreateFile();
-            FileWriter writer = new FileWriter(file, true);
-
-        for (StoredCredentials storedCreds : list) {
-
-            Boolean hostWhitelisted = storedCreds.isHostWhitelisted();
-            Boolean hygieneWhitelisted = storedCreds.isHygieneWhitelisted();
-            if (hostWhitelisted) {
-                    writer.append(storedCreds.getHost());
-                    writer.append(",");
-                    writer.append(storedCreds.getUsername());
-                    writer.append(",");
-                    writer.append(storedCreds.getPassword());
-                    writer.append(",");
-                    writer.append(hostWhitelisted.toString());
-                    writer.append(",");
-                    writer.append(hygieneWhitelisted.toString());
-                    writer.append("\n");
-
-
-                }
-            }
-            writer.flush();
-            writer.close();
-
-        }
-        catch (Exception e) {
-            e.printStackTrace();
+        if (!isSame) {
+            saveOrUpdate(
+                    requestCredentials,
+                    storedCredentials.isHostWhitelisted(),
+                    storedCredentials.isHygieneWhitelisted());
         }
     }
 
-    public void deleteFile(){
-        try {
-            if(file.exists())
-                file.delete();
-        }
-        catch (Exception e){
-            e.printStackTrace();
-        }
+    public TextFileStorage getFPS(){
+        return fps;
     }
-
-
-
 }

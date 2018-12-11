@@ -6,12 +6,16 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.parosproxy.paros.extension.phishingprevention.*;
-import org.parosproxy.paros.extension.phishingprevention.persistence.MemoryPersistenceService;
+import org.parosproxy.paros.extension.phishingprevention.persistence.FilePersistenceService;
+import org.parosproxy.paros.extension.phishingprevention.persistence.TextFileStorage;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.OverrideListener;
 import org.parosproxy.paros.network.HttpMessage;
 import org.powermock.modules.junit4.PowerMockRunner;
 
+import java.util.ArrayList;
+
 import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -47,7 +51,7 @@ public class OverrideListenerTest {
         when(mockCrecentialService.getCredentialsInRequest(any()))
                 .thenReturn(requestCreds);
 
-        PersistenceService memoryPersistenceService = new MemoryPersistenceService();
+        PersistenceService memoryPersistenceService = new FilePersistenceService();
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
         OverrideListener overrideListener = new OverrideListener(
                 mockCrecentialService, passwordHygieneService, memoryPersistenceService);
@@ -85,10 +89,13 @@ public class OverrideListenerTest {
         when(mockCrecentialService.getCredentialsInRequest(any()))
                 .thenReturn(requestCreds);
 
-        PersistenceService memoryPersistenceService = new MemoryPersistenceService();
+        TextFileStorage fps = mock(TextFileStorage.class);
+        when(fps.loadStoredCredentials()).thenReturn(new ArrayList<>());
+
+        PersistenceService persistenceService = new FilePersistenceService(fps);
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
         OverrideListener overrideListener = new OverrideListener(
-                mockCrecentialService, passwordHygieneService, memoryPersistenceService);
+                mockCrecentialService, passwordHygieneService, persistenceService);
         overrideListener.setON(true);
 
         // act
@@ -104,7 +111,7 @@ public class OverrideListenerTest {
         Assert.assertFalse(overrideListener.onHttpRequestSend(controlRequest));
         Assert.assertEquals(expectedBody, controlRequest.getRequestBody().toString());
         Assert.assertTrue(
-                memoryPersistenceService.get(requestCreds.getHost(), requestCreds.getUsername())
+                persistenceService.get(requestCreds.getHost(), requestCreds.getUsername())
                         .isHostWhitelisted());
     }
 
@@ -118,10 +125,13 @@ public class OverrideListenerTest {
         when(mockCrecentialService.getCredentialsInRequest(any()))
                 .thenReturn(requestCreds);
 
-        PersistenceService memoryPersistenceService = new MemoryPersistenceService();
+        TextFileStorage fps = mock(TextFileStorage.class);
+        when(fps.loadStoredCredentials()).thenReturn(new ArrayList<>());
+
+        PersistenceService persistenceService = new FilePersistenceService(fps);
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
         OverrideListener overrideListener = new OverrideListener(
-                mockCrecentialService, passwordHygieneService, memoryPersistenceService);
+                mockCrecentialService, passwordHygieneService, persistenceService);
         overrideListener.setON(true);
 
         // act
@@ -138,7 +148,7 @@ public class OverrideListenerTest {
         // assert
         Assert.assertFalse(overrideListener.onHttpRequestSend(controlRequest));
         Assert.assertNull(
-                memoryPersistenceService.get(requestCreds.getHost(), requestCreds.getUsername()));
+                persistenceService.get(requestCreds.getHost(), requestCreds.getUsername()));
         Assert.assertTrue(controlRequest.getResponseBody().toString().contains("Login canceled!"));
         Assert.assertTrue(overrideListener.getRequestCache().getRequestCache().size() == 0);
     }
@@ -153,7 +163,7 @@ public class OverrideListenerTest {
         when(mockCrecentialService.getCredentialsInRequest(any()))
                 .thenReturn(requestCreds);
 
-        PersistenceService memoryPersistenceService = new MemoryPersistenceService();
+        PersistenceService memoryPersistenceService = new FilePersistenceService();
         memoryPersistenceService.saveOrUpdate(requestCreds, true, false);
 
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();

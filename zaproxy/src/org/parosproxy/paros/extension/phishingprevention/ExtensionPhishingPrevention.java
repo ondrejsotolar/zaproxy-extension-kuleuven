@@ -1,27 +1,15 @@
 package org.parosproxy.paros.extension.phishingprevention;
 
-import org.apache.log4j.Logger;
-import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.extension.ExtensionAdaptor;
 import org.parosproxy.paros.extension.ExtensionHook;
 import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.extension.ViewDelegate;
-import org.parosproxy.paros.extension.phishingprevention.html.CancelPage;
-import org.parosproxy.paros.extension.phishingprevention.html.WarningPage;
 import org.parosproxy.paros.extension.phishingprevention.optionsdialog.OptionsDialog;
 import org.parosproxy.paros.extension.phishingprevention.optionsdialog.PhishingPreventionParam;
-import org.parosproxy.paros.extension.phishingprevention.persistence.MemoryPersistenceService;
-import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCredentials;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.OverrideListener;
 import org.parosproxy.paros.model.Model;
 import org.parosproxy.paros.model.OptionsParam;
-import org.parosproxy.paros.network.HttpMalformedHeaderException;
-import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.view.View;
-
-import java.util.Map;
-import java.util.Objects;
-import java.util.concurrent.ConcurrentHashMap;
 
 public class ExtensionPhishingPrevention extends ExtensionAdaptor implements OptionsChangedListener {
 
