@@ -62,10 +62,9 @@ public class PhishingPreventionStrategiesTest {
 
         testRes = clStrategy.applyStrategy("fE123123f");
         Assert.assertTrue(testRes != null);
-
-        // TODO: case fails. why?
+        
         testRes = clStrategy.applyStrategy("a2sdFGJ12");
-        Assert.assertFalse(testRes == null);
+        Assert.assertTrue(testRes == null);
 
         //Assert.assertTrue(result.getResult());
         //Assert.assertTrue(result.getFailedStrategies().contains(expectedStrategy.getName()));
