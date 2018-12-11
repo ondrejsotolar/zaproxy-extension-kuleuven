@@ -48,8 +48,6 @@ public class TextFileStorageTest {
         store.add(stc3);
         fileTest.saveToFile(store);
         List<StoredCredentials> list =  fileTest.loadStoredCredentials();
-        System.out.println(list);
-        System.out.println(store);
 
         for(int i = 0; i<store.size(); i++)
         {

@@ -68,13 +68,11 @@ public class FilePersistenceTest {
         FilePersistenceService memTest = new FilePersistenceService();
         Credentials cred1 = new Credentials("host1", "usr1", "pass1");
         memTest.saveOrUpdate( cred1, true, false);
-        System.out.println(memTest.get(cred1.getHost(), cred1.getUsername()).getPassword());
         Assert.assertTrue((memTest.get(cred1.getHost(), cred1.getUsername())!=null));
         String pass1 = (memTest.get(cred1.getHost(), cred1.getUsername()).getPassword());
         Credentials cred2 = new Credentials("host2", "usr2", "pass2");
         memTest.saveOrUpdate( cred2, true, false);
         String pass2 = (memTest.get(cred1.getHost(), cred1.getUsername()).getPassword());
-        System.out.println(memTest.get(cred1.getHost(), cred1.getUsername()).getPassword());
 
         Assert.assertTrue(pass1.equals(pass2));
     }
