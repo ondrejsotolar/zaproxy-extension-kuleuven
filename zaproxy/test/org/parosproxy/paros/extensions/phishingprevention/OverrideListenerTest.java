@@ -15,7 +15,6 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import java.util.ArrayList;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -51,10 +50,13 @@ public class OverrideListenerTest {
         when(mockCrecentialService.getCredentialsInRequest(any()))
                 .thenReturn(requestCreds);
 
-        PersistenceService memoryPersistenceService = new FilePersistenceService();
+        TextFileStorage fps = mock(TextFileStorage.class);
+        when(fps.loadStoredCredentials()).thenReturn(new ArrayList<>());
+
+        PersistenceService persistenceService = new FilePersistenceService(fps);
         IPasswordHygieneService passwordHygieneService = new PasswordHygieneService();
         OverrideListener overrideListener = new OverrideListener(
-                mockCrecentialService, passwordHygieneService, memoryPersistenceService);
+                mockCrecentialService, passwordHygieneService, persistenceService);
         overrideListener.setON(true);
 
         HttpMessage msg = new HttpMessage();
@@ -66,7 +68,7 @@ public class OverrideListenerTest {
         Assert.assertTrue(overrideListener.getRequestCache().getRequestCache().size() == 1);
         Assert.assertTrue(overrideListener.getRequestCache().getRequestCache().containsKey(msg));
 
-        Assert.assertFalse(memoryPersistenceService.get(
+        Assert.assertFalse(persistenceService.get(
                 requestCreds.getHost(), requestCreds.getUsername()).isHostWhitelisted());
 
         String reqParam = "<input type=\"hidden\" name=\"%s\" value=\"%d\" />";
