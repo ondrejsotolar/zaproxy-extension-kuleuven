@@ -4,7 +4,7 @@ import org.apache.log4j.Logger;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
 import org.parosproxy.paros.extension.phishingprevention.*;
 import org.parosproxy.paros.extension.phishingprevention.html.ResponseMessageHandler;
-import org.parosproxy.paros.extension.phishingprevention.persistence.MemoryPersistenceService;
+import org.parosproxy.paros.extension.phishingprevention.persistence.FilePersistenceService;
 import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCredentials;
 import org.parosproxy.paros.network.HttpMessage;
 
@@ -31,7 +31,7 @@ public class OverrideListener implements OverrideMessageProxyListener {
     public OverrideListener() {
         this.credentialScannerService = new RequestCredentialScannerService();
         this.passwordHygieneService = new PasswordHygieneService();
-        this.persistenceService = new MemoryPersistenceService();
+        this.persistenceService = new FilePersistenceService();
         this.requestCache = new RequestCache();
         this.responseMessageHandler = new ResponseMessageHandler();
     }

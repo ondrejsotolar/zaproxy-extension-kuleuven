@@ -8,7 +8,7 @@ import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class FilePersistenceService {
+public class TextFileStorage {
 
     private final String cvsSplitBy = ",";
 
@@ -16,16 +16,16 @@ public class FilePersistenceService {
 
     private static Logger log = Logger.getLogger(QueryStringParamScanner.class);
 
-    public FilePersistenceService(String name){
+    public TextFileStorage(String name){
         this.file = new File (
                 "src"+File.separator+
-                        "org"+File.separator+
-                        "parosproxy"+File.separator+
-                        "paros"+File.separator+
-                        "extension"+File.separator+
-                        "phishingprevention"+File.separator+
-                        "persistence"+File.separator+
-                        name
+                "org"+File.separator+
+                "parosproxy"+File.separator+
+                "paros"+File.separator+
+                "extension"+File.separator+
+                "phishingprevention"+File.separator+
+                "persistence"+File.separator+
+                name
         );
         initStorageFile();
     }
@@ -66,7 +66,7 @@ public class FilePersistenceService {
     public void saveToFile(List<StoredCredentials> list) {
         deleteFile();
         try {
-            CreateFile();
+            initStorageFile();
             FileWriter writer = new FileWriter(file, true);
 
         for (StoredCredentials storedCreds : list) {
@@ -84,16 +84,13 @@ public class FilePersistenceService {
                     writer.append(",");
                     writer.append(hygieneWhitelisted.toString());
                     writer.append("\n");
-
-
                 }
             }
             writer.flush();
             writer.close();
-
         }
         catch (Exception e) {
-            e.printStackTrace();
+            log.info(e.toString());
         }
     }
 
@@ -103,10 +100,7 @@ public class FilePersistenceService {
                 file.delete();
         }
         catch (Exception e){
-            e.printStackTrace();
+            log.info(e.toString());
         }
     }
-
-
-
 }

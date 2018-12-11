@@ -2,7 +2,7 @@ package org.parosproxy.paros.extensions.phishingprevention;
 
 import org.junit.Assert;
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
-import org.parosproxy.paros.extension.phishingprevention.persistence.FilePersistenceService;
+import org.parosproxy.paros.extension.phishingprevention.persistence.TextFileStorage;
 
 import org.junit.Test;
 import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCredentials;
@@ -13,12 +13,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-public class FilePersistenceServiceTest {
+public class TextFileStorageTest {
 
     @Test
     public void fileCreateTest(){
 
-        FilePersistenceService fileTest = new FilePersistenceService("dennis.csv");
+        TextFileStorage fileTest = new TextFileStorage("dennis.csv");
         File file = new File("src\\org\\parosproxy\\paros\\extension\\phishingprevention\\persistence\\dennis.csv");
         Assert.assertTrue(file.exists());
 
@@ -26,7 +26,7 @@ public class FilePersistenceServiceTest {
 
     @Test
     public void deleteFileTest(){
-        FilePersistenceService fileTest = new FilePersistenceService("alex.csv");
+        TextFileStorage fileTest = new TextFileStorage("alex.csv");
         fileTest.deleteFile();
         File file = new File("src\\org\\parosproxy\\paros\\extension\\phishingprevention\\persistence\\alex.csv");
         Assert.assertFalse(file.exists());
@@ -35,7 +35,7 @@ public class FilePersistenceServiceTest {
 
     @Test
     public void addAndReadFile(){
-        FilePersistenceService fileTest = new FilePersistenceService("test.csv");
+        TextFileStorage fileTest = new TextFileStorage("test.csv");
         List<StoredCredentials> store = new ArrayList<>();
 
         StoredCredentials stc1 = new StoredCredentials(new Credentials("host1", "usr1", "pass1"),true,true);
@@ -47,7 +47,7 @@ public class FilePersistenceServiceTest {
         StoredCredentials stc3 = new StoredCredentials(new Credentials("host3", "usr3", "pass3"),true,true);
         store.add(stc3);
         fileTest.saveToFile(store);
-        List<StoredCredentials> list =  fileTest.readFIle();
+        List<StoredCredentials> list =  fileTest.loadStoredCredentials();
         System.out.println(list);
         System.out.println(store);
 

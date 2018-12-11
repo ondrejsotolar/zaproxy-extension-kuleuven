@@ -5,13 +5,13 @@ import org.parosproxy.paros.extension.phishingprevention.PersistenceService;
 
 import java.util.*;
 
-public class MemoryPersistenceService implements PersistenceService {
+public class FilePersistenceService implements PersistenceService {
 
     List<StoredCredentials> store;
     PasswordHashingService hashingService = new SimpleHashingService();
     TextFileStorage fps;
 
-    public MemoryPersistenceService(){
+    public FilePersistenceService(){
         fps = new TextFileStorage("storedCredentials.csv");
         store = fps.loadStoredCredentials();
     }

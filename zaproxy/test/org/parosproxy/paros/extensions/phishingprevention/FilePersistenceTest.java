@@ -8,7 +8,7 @@ import org.junit.Test;
 
 import java.io.File;
 
-public class MemoryPersistenceTest {
+public class FilePersistenceTest {
 
     @Test
     public void createFile (){
