@@ -17,9 +17,9 @@ public class FilePersistenceService {
 
     public FilePersistenceService(String name){
         this.name = name;
-        CreateFile();
         file = new File ("src"+File.separator+"org"+File.separator+"parosproxy"+File.separator+"paros"+File.separator+"extension"+File.separator+"phishingprevention"+File.separator+"persistence"+File.separator+name);
-    }
+        CreateFile();
+        }
 
     public void CreateFile() {
 
@@ -77,10 +77,11 @@ public class FilePersistenceService {
                     writer.append(hygieneWhitelisted.toString());
                     writer.append("\n");
 
-                    writer.flush();
-                    writer.close();
+
                 }
             }
+            writer.flush();
+            writer.close();
 
         }
         catch (Exception e) {
