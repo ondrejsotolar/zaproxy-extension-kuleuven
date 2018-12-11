@@ -1,6 +1,5 @@
 package org.parosproxy.paros.extension.phishingprevention.persistence;
 
-import org.hsqldb.util.CSVWriter;
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
 
 import java.io.*;
@@ -38,7 +37,7 @@ public class FilePersistenceService {
         List<StoredCredentials> storedList = new ArrayList<>();
 
         try {
-            bufferedReader = new BufferedReader(new FileReader(name));
+            bufferedReader = new BufferedReader(new FileReader(file));
             while ((line = bufferedReader.readLine()) != null) {
                 String[] gr = line.split(cvsSplitBy);
                 //System.out.println("host: " + gr[0] + " user: " + gr[1] + " pass: " + gr[2] + " isAllowed: " + gr[3]);
