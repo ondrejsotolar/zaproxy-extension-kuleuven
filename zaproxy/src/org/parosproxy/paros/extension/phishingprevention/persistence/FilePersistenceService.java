@@ -13,17 +13,17 @@ public class FilePersistenceService {
     private BufferedReader bufferedReader = null;
     private String line = "";
     private String cvsSplitBy = ",";
+    private File file;
 
     public FilePersistenceService(String name){
         this.name = name;
         CreateFile(name);
+        File file = new File ("src"+File.separator+"org"+File.separator+"parosproxy"+File.separator+"paros"+File.separator+"extension"+File.separator+"phishingprevention"+File.separator+"persistence"+File.separator+name);
     }
 
     public void CreateFile(String name) {
 
         try {
-            File file = new File ("src"+File.separator+"org"+File.separator+"parosproxy"+File.separator+"paros"+File.separator+"extension"+File.separator+"phishingprevention"+File.separator+"persistence"+File.separator+name);
-
             FileWriter writer = new FileWriter(file, true);
 
             /*writer.append("aditya");
@@ -71,10 +71,8 @@ public class FilePersistenceService {
 
         deleteFile();
         try {
-            File file = new File("src" + File.separator + "org" + File.separator + "parosproxy" + File.separator + "paros" + File.separator + "extension" + File.separator + "phishingprevention" + File.separator + "persistence" + File.separator + name);
             FileWriter writer = new FileWriter(file, true);
-
-
+            
         for (StoredCredentials storedCreds : list) {
 
             Boolean allowed = storedCreds.isHostWhitelisted();
@@ -110,7 +108,6 @@ public class FilePersistenceService {
 
     public void deleteFile(){
         try {
-            File file = new File("src" + File.separator + "org" + File.separator + "parosproxy" + File.separator + "paros" + File.separator + "extension" + File.separator + "phishingprevention" + File.separator + "persistence" + File.separator + name);
             if(file.exists())
                 file.delete();
         }
