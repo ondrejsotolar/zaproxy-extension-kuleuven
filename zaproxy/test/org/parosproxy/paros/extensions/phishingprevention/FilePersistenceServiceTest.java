@@ -9,12 +9,8 @@ import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCrede
 
 import java.io.File;
 
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
-
-import static org.junit.Assert.assertTrue;
 
 
 public class FilePersistenceServiceTest {

@@ -3,6 +3,7 @@ package org.parosproxy.paros.extension.phishingprevention.persistence;
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
 import org.parosproxy.paros.extension.phishingprevention.PersistenceService;
 
+import java.io.File;
 import java.util.*;
 
 public class MemoryPersistenceService implements PersistenceService {
@@ -12,7 +13,7 @@ public class MemoryPersistenceService implements PersistenceService {
     FilePersistenceService fps;
 
     public MemoryPersistenceService(){
-        fps = new FilePersistenceService("filetest.csv");
+        fps = new FilePersistenceService("storedCredentials.csv");
         store = fps.readFIle();
     }
 
@@ -48,6 +49,7 @@ public class MemoryPersistenceService implements PersistenceService {
         StoredCredentials stored = get(host, username);
         if (stored != null) {
             store.remove(stored);
+            fps.saveToFile(store);
         }
     }
 
@@ -62,5 +64,9 @@ public class MemoryPersistenceService implements PersistenceService {
                     storedCredentials.isHostWhitelisted(),
                     storedCredentials.isHygieneWhitelisted());
         }
+    }
+
+    public FilePersistenceService getFPS(){
+        return fps;
     }
 }
