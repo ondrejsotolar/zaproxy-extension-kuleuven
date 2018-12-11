@@ -21,7 +21,7 @@ public class TextFileStorageTest {
         TextFileStorage fileTest = new TextFileStorage("dennis.csv");
         File file = new File("src\\org\\parosproxy\\paros\\extension\\phishingprevention\\persistence\\dennis.csv");
         Assert.assertTrue(file.exists());
-
+        fileTest.deleteFile();
     }
 
     @Test
@@ -62,6 +62,8 @@ public class TextFileStorageTest {
             Assert.assertTrue(stca.isHostWhitelisted() == stcb.isHostWhitelisted());
             Assert.assertTrue(stca.isHygieneWhitelisted() == stcb.isHygieneWhitelisted());
         }
+
+        fileTest.deleteFile();
     }
 
 
