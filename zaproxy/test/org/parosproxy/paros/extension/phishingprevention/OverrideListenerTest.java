@@ -1,14 +1,12 @@
-package org.parosproxy.paros.extensions.phishingprevention;
+package org.parosproxy.paros.extension.phishingprevention;
 
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.parosproxy.paros.extension.phishingprevention.*;
 import org.parosproxy.paros.extension.phishingprevention.persistence.FilePersistenceService;
 import org.parosproxy.paros.extension.phishingprevention.persistence.TextFileStorage;
-import org.parosproxy.paros.extension.phishingprevention.OverrideListener;
 import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneService;
 import org.parosproxy.paros.network.HttpMessage;
 import org.powermock.modules.junit4.PowerMockRunner;

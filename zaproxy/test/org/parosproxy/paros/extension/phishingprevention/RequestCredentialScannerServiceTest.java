@@ -1,10 +1,8 @@
-package org.parosproxy.paros.extensions.phishingprevention;
+package org.parosproxy.paros.extension.phishingprevention;
 
 import org.apache.commons.httpclient.URIException;
 import org.junit.Assert;
 import org.junit.Test;
-import org.parosproxy.paros.extension.phishingprevention.CredentialScanerService;
-import org.parosproxy.paros.extension.phishingprevention.Credentials;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.RequestCredentialScannerService;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;

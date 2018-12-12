@@ -1,13 +1,8 @@
-package org.parosproxy.paros.extensions.typosquatter;
+package org.parosproxy.paros.extension.typosquatter;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.parosproxy.paros.extension.typosquatter.strategies.ShortHostStrategy;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class ShortHostStrategyTest {
 

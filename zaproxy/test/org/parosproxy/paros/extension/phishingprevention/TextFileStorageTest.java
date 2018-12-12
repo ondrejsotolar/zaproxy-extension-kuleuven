@@ -1,7 +1,6 @@
-package org.parosproxy.paros.extensions.phishingprevention;
+package org.parosproxy.paros.extension.phishingprevention;
 
 import org.junit.Assert;
-import org.parosproxy.paros.extension.phishingprevention.Credentials;
 import org.parosproxy.paros.extension.phishingprevention.persistence.TextFileStorage;
 
 import org.junit.Test;

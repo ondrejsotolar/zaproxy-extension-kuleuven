@@ -1,12 +1,8 @@
-package org.parosproxy.paros.extensions.typosquatter;
+package org.parosproxy.paros.extension.typosquatter;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.parosproxy.paros.extension.typosquatter.ITyposquattingService;
-import org.parosproxy.paros.extension.typosquatter.TyposquattingResult;
-import org.parosproxy.paros.extension.typosquatter.TyposquattingService;
-import org.parosproxy.paros.extension.typosquatter.TyposquattingStrategy;
 import org.powermock.modules.junit4.PowerMockRunner;
 
 import java.util.ArrayList;

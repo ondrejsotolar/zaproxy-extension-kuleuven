@@ -1,4 +1,4 @@
-package org.parosproxy.paros.extensions.typosquatter;
+package org.parosproxy.paros.extension.typosquatter;
 
 import org.junit.Assert;
 import org.junit.Test;

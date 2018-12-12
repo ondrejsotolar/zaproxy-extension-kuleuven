@@ -1,19 +1,14 @@
-package org.parosproxy.paros.extensions.typosquatter;
+package org.parosproxy.paros.extension.typosquatter;
 
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.internal.matchers.Any;
-import org.parosproxy.paros.extension.typosquatter.*;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 import org.parosproxy.paros.network.HttpRequestHeader;
 import org.powermock.modules.junit4.PowerMockRunner;
-import org.zaproxy.zap.network.HttpRequestBody;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.mockito.Mockito.*;
 

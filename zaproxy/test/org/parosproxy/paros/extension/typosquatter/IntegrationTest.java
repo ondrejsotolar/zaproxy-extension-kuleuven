@@ -1,10 +1,8 @@
-package org.parosproxy.paros.extensions.typosquatter;
+package org.parosproxy.paros.extension.typosquatter;
 
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.*;
 import java.util.Scanner;

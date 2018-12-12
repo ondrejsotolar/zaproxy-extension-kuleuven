@@ -1,9 +1,7 @@
-package org.parosproxy.paros.extensions.phishingprevention;
+package org.parosproxy.paros.extension.phishingprevention;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.parosproxy.paros.extension.phishingprevention.Credentials;
-import org.parosproxy.paros.extension.phishingprevention.IPasswordHygieneService;
 import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneResult;
 import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneService;
 import org.parosproxy.paros.extension.phishingprevention.hygiene.CrackLibTestStrategy;
