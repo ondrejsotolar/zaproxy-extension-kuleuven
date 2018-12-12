@@ -1,9 +1,7 @@
 package org.parosproxy.paros.extension.phishingprevention.html;
 
-import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneResult;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneResult;
 
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class WarningPage {
@@ -37,7 +35,7 @@ public class WarningPage {
 
     private String hygieneListBase = "<p>Password hygiene fail reasons:<br/><ul>%s</ul></p>";
     private String hygieneCheckbox = "<input type=\"checkbox\" name=\"ignore_hygiene\" value=\"true\">" +
-            "Ignore hygiene warnings<br/>";
+            "Ignore hygiene warnings<br/><br/>";
 
 
     public String getHeader() {
@@ -51,6 +49,9 @@ public class WarningPage {
     }
 
     public String getBody(int requestId, String host, PasswordHygieneResult hygieneResult) {
+        if (!hygieneResult.getResult()) {
+            return getBody(requestId, host);
+        }
         return String.format(bodyWithHygiene,
                 getHygieneWarningMessage(hygieneResult),
                 getProceedButtonWithHygiene(host, requestId, host),
