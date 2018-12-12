@@ -10,7 +10,7 @@ Total test coverage:                       61% of lines of code, 66% methods, 85
 GIT commit identifier at start of story:   f8a3217384defeedf8050c7598e575b94e940b18
 GIT commit identifier at end of story      08e2a20fbced48432c8ac9adf1a726ae15a20132
 Time spent on user story:                  Ondrej Sotolar: 56h
-                                           Aditya Paliwal: 10h
+                                           Aditya Paliwal: 25h
                                            Alexandre Arnould: 10h
                                            Dennis Lund: 25h
 Optional remarks:			   See also design documents: "class diagram, 2 sequence diagrams, requestWithPassword.html" in the solutions folder.
