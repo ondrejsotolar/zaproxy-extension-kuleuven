@@ -15,7 +15,7 @@ public class PhishingPreventionParam extends AbstractParam {
     @Override
     protected void parse() {
         secure = getBoolean(SECURE_KEY, false);
-        secure = getBoolean(HYGIENE_KEY, false);
+        hygiene = getBoolean(HYGIENE_KEY, false);
     }
 
     public boolean isSecure() {
