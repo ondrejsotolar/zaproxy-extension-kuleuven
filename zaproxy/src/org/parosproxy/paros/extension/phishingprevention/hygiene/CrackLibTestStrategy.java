@@ -1,7 +1,6 @@
-package org.parosproxy.paros.extension.phishingprevention.strategies;
+package org.parosproxy.paros.extension.phishingprevention.hygiene;
 
 import org.apache.log4j.Logger;
-import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneStrategy;
 import org.parosproxy.paros.extension.phishingprevention.CrackLib.*;
 
 /**

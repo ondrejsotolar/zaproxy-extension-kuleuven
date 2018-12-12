@@ -1,12 +1,4 @@
-package org.parosproxy.paros.extension.phishingprevention.strategies;
-
-import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneStrategy;
-
-import java.io.File;
-import java.io.IOException;
-import java.util.List;
-import java.util.Scanner;
-import java.util.ArrayList;
+package org.parosproxy.paros.extension.phishingprevention.hygiene;
 
 public class CommonPasswordsStrategy implements PasswordHygieneStrategy {
 

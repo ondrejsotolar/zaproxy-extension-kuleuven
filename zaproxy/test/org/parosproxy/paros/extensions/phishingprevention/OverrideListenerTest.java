@@ -8,7 +8,8 @@ import org.junit.runner.RunWith;
 import org.parosproxy.paros.extension.phishingprevention.*;
 import org.parosproxy.paros.extension.phishingprevention.persistence.FilePersistenceService;
 import org.parosproxy.paros.extension.phishingprevention.persistence.TextFileStorage;
-import org.parosproxy.paros.extension.phishingprevention.requestscan.OverrideListener;
+import org.parosproxy.paros.extension.phishingprevention.OverrideListener;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneService;
 import org.parosproxy.paros.network.HttpMessage;
 import org.powermock.modules.junit4.PowerMockRunner;
 

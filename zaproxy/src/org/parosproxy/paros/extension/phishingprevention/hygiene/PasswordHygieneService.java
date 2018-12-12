@@ -1,8 +1,7 @@
-package org.parosproxy.paros.extension.phishingprevention;
+package org.parosproxy.paros.extension.phishingprevention.hygiene;
 
-import org.parosproxy.paros.extension.phishingprevention.strategies.CrackLibTestStrategy;
-import org.parosproxy.paros.extension.phishingprevention.strategies.OnlyNumbersStrategy;
-import org.parosproxy.paros.extension.phishingprevention.strategies.CommonPasswordsStrategy;
+import org.parosproxy.paros.extension.phishingprevention.Credentials;
+import org.parosproxy.paros.extension.phishingprevention.IPasswordHygieneService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +31,7 @@ public class PasswordHygieneService implements IPasswordHygieneService {
         if (credentials == null || credentials.getPassword() == null || credentials.getPassword().isEmpty()) {
             throw new RuntimeException("PasswordHygieneService.checkPasswordHygiene: empty or null password");
         }
-        PasswordHygieneResult result = new PasswordHygieneResult(credentials);
+        PasswordHygieneResult result = new PasswordHygieneResult();
 
         for (PasswordHygieneStrategy strategy : strategies) {
             String reason = strategy.applyStrategy(credentials.getPassword());

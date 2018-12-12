@@ -1,6 +1,4 @@
-package org.parosproxy.paros.extension.phishingprevention.strategies;
-
-import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneStrategy;
+package org.parosproxy.paros.extension.phishingprevention.hygiene;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

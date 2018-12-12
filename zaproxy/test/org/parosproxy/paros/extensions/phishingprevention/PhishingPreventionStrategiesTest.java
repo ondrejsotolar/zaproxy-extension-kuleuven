@@ -2,15 +2,13 @@ package org.parosproxy.paros.extensions.phishingprevention;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.parosproxy.paros.core.scanner.Alert;
-import org.parosproxy.paros.extension.phishingprevention.CrackLib.CrackLib;
 import org.parosproxy.paros.extension.phishingprevention.Credentials;
 import org.parosproxy.paros.extension.phishingprevention.IPasswordHygieneService;
-import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneResult;
-import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneService;
-import org.parosproxy.paros.extension.phishingprevention.strategies.CrackLibTestStrategy;
-import org.parosproxy.paros.extension.phishingprevention.strategies.OnlyNumbersStrategy;
-import org.parosproxy.paros.extension.phishingprevention.strategies.CommonPasswordsStrategy;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneResult;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneService;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.CrackLibTestStrategy;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.OnlyNumbersStrategy;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.CommonPasswordsStrategy;
 
 public class PhishingPreventionStrategiesTest {
 

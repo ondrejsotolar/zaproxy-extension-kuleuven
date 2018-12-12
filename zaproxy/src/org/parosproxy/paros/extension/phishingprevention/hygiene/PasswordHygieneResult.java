@@ -1,18 +1,12 @@
-package org.parosproxy.paros.extension.phishingprevention;
+package org.parosproxy.paros.extension.phishingprevention.hygiene;
+
+import org.parosproxy.paros.extension.phishingprevention.Credentials;
 
 import java.util.HashMap;
 
 public class PasswordHygieneResult {
 
-    private Credentials credentials;
-
-    private HashMap<String, String> mapMsgfailedStrategies;
-
-    public PasswordHygieneResult(Credentials credentials) {
-
-        this.credentials = credentials;
-        this.mapMsgfailedStrategies = new HashMap<>();
-    }
+    private HashMap<String, String> mapMsgfailedStrategies = new HashMap<>();
 
     public void addMsgFailedStrategy(String name, String reason) {
         mapMsgfailedStrategies.put(name, reason);

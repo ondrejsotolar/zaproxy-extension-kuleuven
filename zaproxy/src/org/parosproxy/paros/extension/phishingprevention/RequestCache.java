@@ -1,4 +1,4 @@
-package org.parosproxy.paros.extension.phishingprevention.requestscan;
+package org.parosproxy.paros.extension.phishingprevention;
 
 import org.parosproxy.paros.network.HttpMessage;
 

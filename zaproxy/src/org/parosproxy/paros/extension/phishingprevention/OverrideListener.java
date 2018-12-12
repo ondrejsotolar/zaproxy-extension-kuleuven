@@ -1,11 +1,13 @@
-package org.parosproxy.paros.extension.phishingprevention.requestscan;
+package org.parosproxy.paros.extension.phishingprevention;
 
 import org.apache.log4j.Logger;
 import org.parosproxy.paros.core.proxy.OverrideMessageProxyListener;
-import org.parosproxy.paros.extension.phishingprevention.*;
 import org.parosproxy.paros.extension.phishingprevention.html.ResponseMessageHandler;
 import org.parosproxy.paros.extension.phishingprevention.persistence.FilePersistenceService;
 import org.parosproxy.paros.extension.phishingprevention.persistence.StoredCredentials;
+import org.parosproxy.paros.extension.phishingprevention.requestscan.RequestCredentialScannerService;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneResult;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneService;
 import org.parosproxy.paros.network.HttpMessage;
 
 public class OverrideListener implements OverrideMessageProxyListener {
@@ -68,12 +70,12 @@ public class OverrideListener implements OverrideMessageProxyListener {
                 requestCredentials.getHost(),
                 requestCredentials.getUsername()
         );
-        if (isUnhandledCredentials(storedCredentials)) {
+        if (isUnhandledCredentials(requestCredentials, storedCredentials)) {
             if (isUnhandledCredentialsHandled(requestCredentials, storedCredentials, msg))
                 return true;
         }
 
-        if (isCorrectStoredCredentials(storedCredentials)) {
+        if (isCorrectStoredCredentials(requestCredentials, storedCredentials)) {
             persistenceService.updatePassword(requestCredentials, storedCredentials);
             return false;
         }
@@ -113,15 +115,19 @@ public class OverrideListener implements OverrideMessageProxyListener {
         return requestCredentials == null;
     }
 
-    private boolean isUnhandledCredentials(StoredCredentials storedCredentials) {
+    private boolean isUnhandledCredentials(Credentials requestCredentials, StoredCredentials storedCredentials) {
         return storedCredentials == null
                 || !storedCredentials.isHostWhitelisted()
-                || (!storedCredentials.isHygieneWhitelisted() && hygieneON);
+                || (!storedCredentials.isHygieneWhitelisted()
+                    && hygieneON
+                    && passwordHygieneService.checkPasswordHygiene(requestCredentials).getResult());
     }
 
-    private boolean isCorrectStoredCredentials(StoredCredentials storedCredentials) {
+    private boolean isCorrectStoredCredentials(Credentials requestCredentials, StoredCredentials storedCredentials) {
      return storedCredentials.isHostWhitelisted()
-             && (storedCredentials.isHygieneWhitelisted() || !hygieneON);
+             && (storedCredentials.isHygieneWhitelisted()
+                || !hygieneON
+                || !passwordHygieneService.checkPasswordHygiene(requestCredentials).getResult());
     }
 
     private boolean isUnhandledCredentialsHandled(Credentials requestCredentials, StoredCredentials storedCredentials, HttpMessage msg) {

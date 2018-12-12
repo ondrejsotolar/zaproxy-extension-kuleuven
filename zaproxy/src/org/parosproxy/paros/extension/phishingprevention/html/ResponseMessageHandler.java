@@ -1,6 +1,6 @@
 package org.parosproxy.paros.extension.phishingprevention.html;
 
-import org.parosproxy.paros.extension.phishingprevention.PasswordHygieneResult;
+import org.parosproxy.paros.extension.phishingprevention.hygiene.PasswordHygieneResult;
 import org.parosproxy.paros.network.HttpMalformedHeaderException;
 import org.parosproxy.paros.network.HttpMessage;
 

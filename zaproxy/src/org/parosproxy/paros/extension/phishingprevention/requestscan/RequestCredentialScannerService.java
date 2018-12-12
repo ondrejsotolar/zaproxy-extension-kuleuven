@@ -1,5 +1,7 @@
-package org.parosproxy.paros.extension.phishingprevention;
+package org.parosproxy.paros.extension.phishingprevention.requestscan;
 
+import org.parosproxy.paros.extension.phishingprevention.CredentialScanerService;
+import org.parosproxy.paros.extension.phishingprevention.Credentials;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.GetRequestScanner;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.PostRequestScanner;
 import org.parosproxy.paros.extension.phishingprevention.requestscan.RequestParamsScanner;

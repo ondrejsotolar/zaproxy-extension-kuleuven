@@ -6,7 +6,6 @@ import org.parosproxy.paros.extension.OptionsChangedListener;
 import org.parosproxy.paros.extension.ViewDelegate;
 import org.parosproxy.paros.extension.phishingprevention.optionsdialog.OptionsDialog;
 import org.parosproxy.paros.extension.phishingprevention.optionsdialog.PhishingPreventionParam;
-import org.parosproxy.paros.extension.phishingprevention.requestscan.OverrideListener;
 import org.parosproxy.paros.model.Model;
 import org.parosproxy.paros.model.OptionsParam;
 import org.parosproxy.paros.view.View;
